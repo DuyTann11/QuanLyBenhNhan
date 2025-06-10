@@ -1,0 +1,238 @@
+ {% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+
+<!-- appointments23:19-->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <title>Preclinic - Medical & Hospital - Bootstrap 4 Admin Template</title>
+
+
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/font-awesome.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/select2.min.css' %}" />
+
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}" />
+    <!--[if lt IE 9]>
+		<script src="assets/js/html5shiv.min.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+    <div class="main-wrapper">
+        {% block content %}
+        <div class="page-wrapper">
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-4 col-3">
+                        <h4 class="page-title">Danh sách uống thuốc</h4>
+                    </div>
+                    <div class="col-sm-8 col-9 text-right m-b-20">
+                    </div>
+                </div>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="table-responsive">
+							<table class="table table-striped custom-table datatable">
+    <thead>
+        <tr>
+            <th>STT</th>
+            <th>Họ tên</th>
+            <th>Năm sinh</th>
+            <th>Giới tính</th>
+            <th>Khu</th>
+            <th style="width: 120px;">Thuốc</th>           
+            <th>Ngày khám</th>
+            <th>Ngày tái khám</th>
+       
+        </tr>
+    </thead>
+    <tbody>
+       <tr>
+    <td>1</td>
+    <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="">
+        Nguyễn Văn Anh
+    </td>
+    <td>1985</td>
+    <td>Nam</td>
+    <td>Nội tổng quát</td>
+
+    <!-- Thuốc -->
+    <td><input type="text" class="form-control" placeholder="Nhập tên thuốc"></td>
+
+    <!-- Số lượng -->
+
+
+    <!-- Ngày khám -->
+    <td><input type="date" class="form-control"></td>
+
+    <!-- Ngày tái khám -->
+    <td><input type="date" class="form-control"></td>
+
+   
+</tr>
+        <tr>
+    <td>2</td>
+    <td><img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt=""> Trần Thị B</td>
+    <td>1990</td>
+    <td>Nữ</td>
+    <td>Nhi khoa</td>
+    <td><input type="text" class="form-control" placeholder="Nhập tên thuốc"></td>
+
+    <td><input type="date" class="form-control"></td>
+    <td><input type="date" class="form-control"></td>
+    
+</tr>
+
+<tr>
+    <td>3</td>
+    <td><img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt=""> Lê Văn C</td>
+    <td>1978</td>
+    <td>Nam</td>
+    <td>Tim mạch</td>
+    <td><input type="text" class="form-control" placeholder="Nhập tên thuốc"></td>
+    <td><input type="date" class="form-control"></td>
+    <td><input type="date" class="form-control"></td>
+    
+</tr>
+
+<tr>
+    <td>4</td>
+    <td><img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt=""> Phạm Thị D</td>
+    <td>1982</td>
+    <td>Nữ</td>
+    <td>Sản khoa</td>
+    <td><input type="text" class="form-control" placeholder="Nhập tên thuốc"></td>
+    <td><input type="date" class="form-control"></td>
+    <td><input type="date" class="form-control"></td>
+    
+</tr>
+        <tr>
+    <td>5</td>
+    <td><img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt=""> Đinh Văn E</td>
+    <td>1965</td>
+    <td>Nam</td>
+    <td>Chấn thương</td>
+    <td><input type="text" class="form-control" placeholder="Nhập tên thuốc"></td>
+    <td><input type="date" class="form-control"></td>
+    <td><input type="date" class="form-control"></td>
+    
+</tr>
+
+<tr>
+    <td>6</td>
+    <td><img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt=""> Nguyễn Thị F</td>
+    <td>1975</td>
+    <td>Nữ</td>
+    <td>Nội tiết</td>
+    <td><input type="text" class="form-control" placeholder="Nhập tên thuốc"></td>
+    <td><input type="date" class="form-control"></td>
+    <td><input type="date" class="form-control"></td>
+    
+</tr>
+
+<tr>
+    <td>7</td>
+    <td><img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt=""> Trương Văn G</td>
+    <td>1992</td>
+    <td>Nam</td>
+    <td>Da liễu</td>
+    <td><input type="text" class="form-control" placeholder="Nhập tên thuốc"></td>
+    <td><input type="date" class="form-control"></td>
+    <td><input type="date" class="form-control"></td>
+    
+</tr>
+        <tr>
+    <td>8</td>
+    <td><img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt=""> Hoàng Thị H</td>
+    <td>1988</td>
+    <td>Nữ</td>
+    <td>Tiêu hoá</td>
+    <td><input type="text" class="form-control" placeholder="Nhập tên thuốc"></td>
+    <td><input type="date" class="form-control"></td>
+    <td><input type="date" class="form-control"></td>
+    
+</tr>
+
+<tr>
+    <td>9</td>
+    <td><img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt=""> Phan Văn I</td>
+    <td>2000</td>
+    <td>Nam</td>
+    <td>Mắt</td>
+    <td><input type="text" class="form-control" placeholder="Nhập tên thuốc"></td>
+    <td><input type="date" class="form-control"></td>
+    <td><input type="date" class="form-control"></td>
+   
+</tr>
+
+<tr>
+    <td>10</td>
+    <td><img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt=""> Lưu Thị K</td>
+    <td>1980</td>
+    <td>Nữ</td>
+    <td>Thần kinh</td>
+    <td><input type="text" class="form-control" placeholder="Nhập tên thuốc"></td>
+    <td><input type="date" class="form-control"></td>
+    <td><input type="date" class="form-control"></td>
+    
+</tr>
+    </tbody>
+</table>
+<div style="margin-top: 20px; text-align: right;">
+    <button onclick="exportToExcel()" style="padding: 10px 20px; font-weight: bold; background-color: #4CAF50; color: white; border: none; cursor: pointer;">
+      Lưu 
+    </button>
+  </div>
+
+						</div>
+					</div>
+                </div>
+            </div>
+            
+		</div>
+    </div>
+    
+
+    <div class="sidebar-overlay" data-reff=""></div>
+    <script src="{% static 'assets/js/jquery-3.2.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/popper.min.js' %}"></script>
+    <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery.slimscroll.js' %}"></script>
+    <script src="{% static 'assets/js/select2.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'assets/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'assets/js/moment.min.js' %}"></script>
+    <script src="{% static 'assets/js/bootstrap-datetimepicker.min.js' %}"></script>
+    <script src="{% static 'assets/js/app.js' %}"></script>
+	<script>
+            $(function () {
+                $('#datetimepicker3').datetimepicker({
+                    format: 'LT'
+                });
+				$('#datetimepicker4').datetimepicker({
+                    format: 'LT'
+                });
+            });
+            $(document).ready(function () {
+    
+    // Kích hoạt dropdown nếu chưa hoạt động
+    $('.dropdown-toggle').dropdown();
+    $('div.dataTables_length select').css('width', '50px');
+    
+    
+  });
+     </script>
+     
+     {% endblock %}
+</body>
+
+
+<!-- appointments23:20-->
+</html>

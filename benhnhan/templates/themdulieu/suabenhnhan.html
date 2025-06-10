@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+
+<!-- add-patient24:06-->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    {% block title %}Cập nhập bệnh nhân{% endblock %}
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <!--[if lt IE 9]>
+		<script src="assets/js/html5shiv.min.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+    <div class="main-wrapper">
+        {% block content %}
+        <div class="page-wrapper">
+            <div class="content">
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        <h4 class="page-title">Thêm bệnh nhân</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        {% if messages %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+{% endif %}
+                        <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label>Họ Tên Bệnh Nhân</label>
+                <input class="form-control" type="text" name="HoVaTen" value="{{ benhnhan.HoVaTen }}" required>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>Năm sinh</label>
+                <input type="number" class="form-control" name="NamSinh" value="{{ benhnhan.NamSinh }}" required>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>Khu</label>
+                <input class="form-control" type="text" name="Khu" value="{{ benhnhan.Khu }}">
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="form-group gender-select">
+                <label class="gen-label">Giới tính:</label>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                        <input type="radio" name="GioiTinh" value="M" class="form-check-input"
+                            {% if benhnhan.GioiTinh == 'M' %}checked{% endif %}>Nam
+                    </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                        <input type="radio" name="GioiTinh" value="F" class="form-check-input"
+                            {% if benhnhan.GioiTinh == 'F' %}checked{% endif %}>Nữ
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="form-group gender-select">
+                <label class="gen-label">Trạng thái:</label>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                        <input type="radio" name="TrangThai" value="Hoạt động" class="form-check-input"
+                            {% if benhnhan.TrangThai == 'Hoạt động' %}checked{% endif %}>Hoạt động
+                    </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                        <input type="radio" name="TrangThai" value="Ngưng hoạt động" class="form-check-input"
+                            {% if benhnhan.TrangThai == 'Ngưng hoạt động' %}checked{% endif %}>Ngưng hoạt động
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="m-t-20 text-center">
+        <button class="btn btn-primary submit-btn" type="submit">Cập nhật bệnh nhân</button>
+    </div>
+</form>
+                    </div>
+                </div>
+            </div>
+			
+        </div>
+    </div>
+    <div class="sidebar-overlay" data-reff=""></div>
+    <script src="assets/js/jquery-3.2.1.min.js"></script>
+	<script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/jquery.slimscroll.js"></script>
+    <script src="assets/js/select2.min.js"></script>
+	<script src="assets/js/moment.min.js"></script>
+	<script src="assets/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="assets/js/app.js"></script>
+    {% endblock %}
+</body>
+
+
+<!-- add-patient24:07-->
+</html>

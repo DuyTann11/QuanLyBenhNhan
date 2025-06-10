@@ -1,0 +1,200 @@
+ {% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <!-- index22:59 -->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0" />
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/img/favicon.ico' %}" />
+    <title>Preclinic - Medical & Hospital - Bootstrap 4 Admin Template</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/font-awesome.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}" />
+    <!--            [if lt IE 9]>
+		<script src="assets/js/html5shiv.min.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+	<![endif]            -->
+  </head>
+
+  <body>
+    <div class="main-wrapper">
+     
+      {% block content %}
+      <div class="page-wrapper">
+        <div class="content">
+          <div class="row">
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+              <div class="dash-widget">
+                <span class="dash-widget-bg1"><i class="fa fa-id-badge" aria-hidden="true"></i></span>
+                <div class="dash-widget-info text-right">
+                  <h3>{{ soNhanVienDangLam }}</h3>
+                  <span class="widget-title1">Nhân Viên <i class="fa fa-check" aria-hidden="true"></i></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+              <div class="dash-widget">
+                <span class="dash-widget-bg2"><i class="fa fa-wheelchair"></i></span>
+                <div class="dash-widget-info text-right">
+                  <h3>{{ soBenhNhan }}</h3>
+                  <span class="widget-title2">Bệnh Nhân <i class="fa fa-check" aria-hidden="true"></i></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+              <div class="dash-widget">
+                <span class="dash-widget-bg3"><i class="fa fa-user" aria-hidden="true"></i></span>
+                <div class="dash-widget-info text-right">
+                  <h3>{{ soTaiKhoan }}</h3>
+                  <span class="widget-title3">Tài Khoản <i class="fa fa-check" aria-hidden="true"></i></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+              <div class="dash-widget">
+                <span class="dash-widget-bg4"><i class="fa fa-heartbeat" aria-hidden="true"></i></span>
+                <div class="dash-widget-info text-right">
+                  <h3>{{ soNguoiCanUongThuoc }}</h3>
+                  <span class="widget-title4">Chờ Uống Thuốc <i class="fa fa-check" aria-hidden="true"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+{% if soNguoiCanTaiKham > 0 %}
+<div class="col-md-12">
+    <a href="{% url 'lichuongthuoc' %}?filter=homnay" style="text-decoration: none;">
+        <div class="alert alert-info d-flex align-items-center" role="alert">
+            <i class="fa fa-info-circle mr-2" aria-hidden="true"></i>
+            <span>
+                <strong>
+                    Có {{ soNguoiCanTaiKham }} người cần được tái khám vào ngày {{ ngayTaiKham|date:"d/m/Y" }}.
+                </strong>
+            </span>
+        </div>
+    </a>
+</div>
+{% endif %}
+</div>
+
+          <div class="row">
+            <div class="col-12 col-md-6 col-lg-8 col-xl-8">
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title d-inline-block" style="color: red;">Có {{ soNguoiCanUongThuoc }} bệnh nhân cần uống thuốc trong ngày</h4>
+                  <a href="/lichuongthuoc/" class="btn btn-primary float-right">Xem tất cả</a>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table mb-0">
+                      <thead>
+        <tr>
+
+            <th>Họ tên</th>
+            <th>Năm sinh</th>
+            <th>Giới tính</th>
+            <th>Khu</th>
+            <th>Thuốc</th>       
+            <th>Ngày khám</th>
+            <th>Ngày tái khám</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in danhsach %}
+    <tr>
+
+        <td>
+            
+            {{ item.BenhNhan.HoVaTen }}
+        </td>
+        <td>{{ item.BenhNhan.NamSinh }}</td>
+        <td>
+            {% if item.BenhNhan.GioiTinh == 'M' %}Nam{% else %}Nữ{% endif %}
+        </td>
+        <td>{{ item.BenhNhan.Khu }}</td>
+        <td>{% if item.Thuoc %}{{ item.Thuoc }}{% endif %}</td>
+<td>{% if item.NgayKham %}{{ item.NgayKham|date:"d/m/Y" }}{% endif %}</td>
+<td>{% if item.NgayTaiKham %}{{ item.NgayTaiKham|date:"d/m/Y" }}{% endif %}</td>
+        
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="9" class="text-center">Không có dữ liệu</td>
+    </tr>
+    {% endfor %}
+        
+    </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4 col-xl-4">
+              <div class="card member-panel" style="height: 426px;">
+                <div class="card-header bg-white">
+                  <h4 class="card-title mb-0">Nhân Viên</h4>
+                </div>
+                <div class="card-body">
+                  <ul class="contact-list">
+                    {% for nv in nhanviens %}
+<li>
+  <div class="contact-cont">
+    <div class="float-left user-img m-r-10">
+      <a href="#" title="{{ nv.HoTen }}">
+        <img src="{% static 'assets/img/user.jpg' %}" alt="" class="w-40 rounded-circle" />
+        <span class="status {% if nv.TrangThai == 'Đang làm' %}online{% else %}offline{% endif %}"></span>
+      </a>
+    </div>
+    <div class="contact-info">
+      <span class="contact-name text-ellipsis">{{ nv.HoTen }}</span>
+      <span class="contact-date">{{ nv.ChucVu }}</span>
+    </div>
+  </div>
+</li>
+{% empty %}
+<li>Không có nhân viên nào.</li>
+{% endfor %}
+                    
+                  </ul>
+                </div>
+                <div class="card-footer text-center bg-white">
+                  <a href="/bacsi/" class="text-muted">Xem tất cả bác sĩ</a>
+                </div>
+              </div>
+            </div>
+          </div>
+       
+      </div>
+    </div>
+    <div class="sidebar-overlay" data-reff=""></div>
+    <script src="{% static 'assets/js/jquery-3.2.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/popper.min.js' %}"></script>
+    <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+    
+    <script src="{% static 'assets/js/Chart.bundle.js' %}"></script>
+    <script src="{% static 'assets/js/chart.js' %}"></script>
+    <script src="{% static 'assets/js/app.js' %}"></script>
+    <script>
+  $(document).ready(function () {
+    $('.dropdown-toggle').on('click', function (e) {
+      e.preventDefault();
+      $(this).parent().toggleClass('show');
+      $(this).next('.dropdown-menu').toggleClass('show');
+    });
+
+    $(document).on('click', function (e) {
+      if (!$(e.target).closest('.dropdown').length) {
+        $('.dropdown').removeClass('show');
+        $('.dropdown-menu').removeClass('show');
+      }
+    });
+  });
+</script>
+    {% endblock %}
+  </body>
+
+  <!-- index22:59 -->
+</html>

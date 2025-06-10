@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <!-- index22:59 -->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0" />
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/img/favicon.ico' %}" />
+    <title>{% block title %}Bảng điều khiển{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/font-awesome.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/select2.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/dataTables.bootstrap4.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap-datetimepicker.min.css' %}" />
+
+    <!--                 [if lt IE 9]>
+		<script src="assets/js/html5shiv.min.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+	<![endif]                 -->
+  </head>
+  <body>
+    <div class="header">
+      <div class="header-left">
+        <a href="index-2.html" class="logo"><img src="{% static 'assets/img/logo.png' %}" width="35" height="35" alt="" /> <span>Preclinic</span></a>
+      </div>
+      <a id="toggle_btn" href="javascript:void(0);"><i class="fa fa-bars"></i></a>
+      <a id="mobile_btn" class="mobile_btn float-left" href="#sidebar"><i class="fa fa-bars"></i></a>
+      <ul class="nav user-menu float-right">
+        
+        
+        <li class="nav-item dropdown has-arrow">
+  <a href="#" class="dropdown-toggle nav-link user-link" data-toggle="dropdown">
+    <span class="user-img">
+      <img class="rounded-circle" src="{% static 'assets/img/user.jpg' %}" width="24" alt="Admin" />
+      <span class="status online"></span>
+    </span>
+    <span>{{ request.session.ten_dang_nhap|default:"Admin" }}</span>
+  </a>
+  <div class="dropdown-menu">
+    <a class="dropdown-item" href="/doimatkhau/">Đổi mật khẩu</a>
+    <a class="dropdown-item" href="{% url 'dangxuat' %}">Đăng xuất</a>
+  </div>
+</li>
+      </ul>
+      <div class="dropdown mobile-user-menu float-right">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+        <div class="dropdown-menu dropdown-menu-right">
+          <a class="dropdown-item" href="doimatkhau">Đổi mặt khẩu</a>
+          <a class="dropdown-item" href="login.html">Đăng xuất</a>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-inner slimscroll">
+        <div id="sidebar-menu" class="sidebar-menu">
+          <ul>
+            <li class="menu-title">Chính</li>
+            <li class="active">
+              <a href="/"><i class="fa fa-dashboard"></i> <span>Bảng Điều Khiển</span></a>
+            </li>
+            <li>
+              <a href="/bacsi/"><i class="fa fa-id-badge"></i> <span>Nhân Viên</span></a>
+            </li>
+            <li>
+              <a href="/benhnhan/"><i class="fa fa-wheelchair"></i> <span>Bệnh Nhân</span></a>
+            </li>
+            <li>
+              <a href="/lichuongthuoc/"><i class="fa fa-calendar"></i> <span>Lịch Uống Thuốc</span></a>
+            </li>
+             {% if request.session.quyen != 'nhanvien' %}
+<li>
+  <a href="/taikhoan/"><i class="fa fa-user"></i> <span>Tài khoản</span></a>
+</li>
+{% endif %}
+            
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+    <main>
+      {% block content %}
+
+      {% endblock %}
+    </main>
+    <div class="sidebar-overlay" data-reff=""></div>
+    <script src="{% static 'assets/js/jquery-3.2.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/popper.min.js' %}"></script>
+    <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery.slimscroll.js' %}"></script>
+    <script src="{% static 'assets/js/Chart.bundle.js' %}"></script>
+    <script src="{% static 'assets/js/chart.js' %}"></script>
+    <script src="{% static 'assets/js/app.js' %}"></script>
+    <script>
+      $(document).ready(function () {
+        var currentUrl = window.location.pathname
+      
+        $('.sidebar-menu li').removeClass('active') // Xoá hết active cũ
+      
+        $('.sidebar-menu li').each(function () {
+          var link = $(this).find('a').attr('href')
+      
+          if (link === currentUrl) {
+            $(this).addClass('active')
+          }
+        })
+      
+        // Khi click vào menu khác
+        $('.sidebar-menu li a').on('click', function () {
+          $('.sidebar-menu li').removeClass('active') // Xoá active tất cả
+          $(this).parent().addClass('active') // Thêm active vào cái vừa click
+        })
+      })
+    </script>
+    
+  </body>
+</html>

@@ -1,0 +1,197 @@
+ {% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+
+<!-- appointments23:19-->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    {% block title %}Lịch uống thuốc{% endblock %}
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/font-awesome.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/select2.min.css' %}" />
+
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}" />
+    
+    <!--[if lt IE 9]>
+		<script src="assets/js/html5shiv.min.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+    <div class="main-wrapper">
+        {% block content %}
+        <div class="page-wrapper">
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-4 col-3">
+                        <h4 class="page-title">Danh sách uống thuốc</h4>
+                    </div>
+                   
+                </div>
+                <input
+  type="text"
+  id="searchAll"
+  placeholder="Tìm theo tên, giới tính, hoặc khu..."
+  style="padding:5px; width: 300px; margin-bottom: 15px;"
+/>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="table-responsive">
+							<table class="table table-striped custom-table datatable">
+    <thead>
+        <tr>
+            <th>STT</th>
+            <th>Họ tên</th>
+            <th>Năm sinh</th>
+            <th>Giới tính</th>
+            <th>Khu</th>
+            <th>Thuốc</th>       
+            <th>Ngày khám</th>
+            <th>Ngày tái khám</th>
+            <th class="text-right">Hoạt động</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in danhsach %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>
+            <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="">
+            {{ item.BenhNhan.HoVaTen }}
+        </td>
+        <td>{{ item.BenhNhan.NamSinh }}</td>
+        <td>
+            {% if item.BenhNhan.GioiTinh == 'M' %}Nam{% else %}Nữ{% endif %}
+        </td>
+        <td>{{ item.BenhNhan.Khu }}</td>
+        <td>{% if item.Thuoc %}{{ item.Thuoc }}{% endif %}</td>
+<td>{% if item.NgayKham %}{{ item.NgayKham|date:"d/m/Y" }}{% endif %}</td>
+<td>{% if item.NgayTaiKham %}{{ item.NgayTaiKham|date:"d/m/Y" }}{% endif %}</td>
+        <td class="text-right">
+            <div class="dropdown dropdown-action">
+                <a href="#" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+                <div class="dropdown-menu dropdown-menu-right">
+<a class="dropdown-item" href="/suadanhsach/{{ item.BenhNhan.BenhNhanID }}/">
+  <i class="fa fa-pencil m-r-5"></i> Chỉnh sửa
+</a>
+                   
+                </div>
+            </div>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="9" class="text-center">Không có dữ liệu</td>
+    </tr>
+    {% endfor %}
+        
+    </tbody>
+</table>
+<div style="margin-top: 20px; text-align: right;">
+    <button onclick="exportToExcel()" style="padding: 10px 20px; font-weight: bold; background-color: #4CAF50; color: white; border: none; cursor: pointer;">
+      Xuất Excel
+    </button>
+  </div>
+
+						</div>
+					</div>
+                </div>
+            </div>
+            
+		</div>
+    </div>
+<div class="sidebar-overlay" data-reff=""></div>
+    <script src="{% static 'assets/js/jquery-3.2.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/popper.min.js' %}"></script>
+   
+    <script src="{% static 'assets/js/jquery.slimscroll.js' %}"></script>
+    <script src="{% static 'assets/js/select2.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'assets/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'assets/js/moment.min.js' %}"></script>
+    <script src="{% static 'assets/js/bootstrap-datetimepicker.min.js' %}"></script>
+    <script src="{% static 'assets/js/app.js' %}"></script>
+
+	<script>
+            $(function () {
+                $('#datetimepicker3').datetimepicker({
+                    format: 'LT'
+                });
+				$('#datetimepicker4').datetimepicker({
+                    format: 'LT'
+                });
+            });
+     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+  function exportToExcel() {
+    const originalTable = document.querySelector("table");
+
+    // Clone bảng để không ảnh hưởng DOM gốc
+    const clonedTable = originalTable.cloneNode(true);
+
+    // Xoá cột cuối (Hoạt động) trong thead
+    const theadRow = clonedTable.querySelector("thead tr");
+    if (theadRow) theadRow.deleteCell(-1);
+
+    // Xoá cột cuối (Hoạt động) trong tbody
+    clonedTable.querySelectorAll("tbody tr").forEach(row => {
+      row.deleteCell(-1);
+    });
+
+    // Chuyển table thành worksheet
+    const worksheet = XLSX.utils.table_to_sheet(clonedTable, {
+      raw: false, // Giữ dữ liệu định dạng
+    });
+
+    // Tạo workbook và gắn worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSach");
+
+    // Xuất file .xlsx
+    XLSX.writeFile(workbook, "Danh sách uống thuốc.xlsx");
+  }
+  $(document).ready(function () {
+    
+    // Kích hoạt dropdown nếu chưa hoạt động
+    $('.dropdown-toggle').dropdown();
+    $('div.dataTables_length select').css('width', '50px');
+    
+    
+  });
+</script>
+<script>
+  const searchAll = document.getElementById('searchAll');
+  const tableBody = document.querySelector('.table-striped.custom-table.datatable tbody');
+
+  function filterTable() {
+    const filter = searchAll.value.toLowerCase();
+
+    for (let row of tableBody.rows) {
+      const name = row.cells[1].textContent.toLowerCase();
+      const gender = row.cells[3].textContent.toLowerCase();
+      const khu = row.cells[4].textContent.toLowerCase();
+
+      // Nếu nhập chuỗi mà trùng tên hoặc giới tính hoặc khu thì hiển thị
+      if (name.includes(filter) || gender.includes(filter) || khu.includes(filter)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    }
+  }
+
+  searchAll.addEventListener('input', filterTable);
+</script>
+     {% endblock %}
+</body>
+
+
+<!-- appointments23:20-->
+</html>

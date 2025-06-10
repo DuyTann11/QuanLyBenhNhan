@@ -1,0 +1,124 @@
+ {% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <!-- index22:59 -->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0" />
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/img/favicon.ico' %}" />
+    <title>Preclinic - Medical & Hospital - Bootstrap 4 Admin Template</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/font-awesome.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}" />
+    <!--            [if lt IE 9]>
+		<script src="assets/js/html5shiv.min.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+	<![endif]            -->
+  </head>
+
+  <body>
+    <div class="main-wrapper">
+     
+      {% block content %}
+      <div class="page-wrapper">
+        <div class="content">
+          <div class="row">
+            <div class="container mt-5">
+  <h3 class="mb-4">📊 Báo cáo & Thống kê sức khỏe bệnh nhân</h3>
+
+  <!-- Bộ lọc thời gian -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <label>Từ ngày:</label>
+      <input type="date" class="form-control" id="start-date" />
+    </div>
+    <div class="col-md-3">
+      <label>Đến ngày:</label>
+      <input type="date" class="form-control" id="end-date" />
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+      <button class="btn btn-primary w-100"><i class="fa fa-search mr-1"></i> Lọc dữ liệu</button>
+    </div>
+  </div>
+
+  <!-- Biểu đồ thống kê -->
+  <div class="row mb-4">
+    <div class="col-md-12">
+      <canvas id="healthChart" height="100"></canvas>
+    </div>
+  </div>
+
+  <!-- Bảng dữ liệu bệnh nhân -->
+  <div class="row">
+    <div class="col-md-12">
+      <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+          <tr>
+            <th>#</th>
+            <th>Họ tên</th>
+            <th>Ngày khám</th>
+            <th>Tình trạng</th>
+            <th>Ghi chú</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Nguyễn Văn A</td>
+            <td>25/05/2025</td>
+            <td><span class="badge badge-success">Tốt</span></td>
+            <td>Không triệu chứng</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Trần Thị B</td>
+            <td>25/05/2025</td>
+            <td><span class="badge badge-warning">Trung bình</span></td>
+            <td>Cần theo dõi huyết áp</td>
+          </tr>
+          <!-- Thêm nhiều dòng khác -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+          </div>
+          
+       
+      </div>
+    </div>
+    <div class="sidebar-overlay" data-reff=""></div>
+    <script src="{% static 'assets/js/jquery-3.2.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/popper.min.js' %}"></script>
+    <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery.slimscroll.js' %}"></script>
+    <script src="{% static 'assets/js/Chart.bundle.js' %}"></script>
+    <script src="{% static 'assets/js/chart.js' %}"></script>
+    <script src="{% static 'assets/js/app.js' %}"></script>
+    <script>
+  const ctx = document.getElementById('healthChart').getContext('2d');
+  const healthChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Tốt', 'Trung bình', 'Xấu'],
+      datasets: [{
+        label: 'Số lượng bệnh nhân',
+        data: [12, 5, 2], // dữ liệu giả
+        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
+       {% endblock %}
+  </body>
+
+  <!-- index22:59 -->
+</html>

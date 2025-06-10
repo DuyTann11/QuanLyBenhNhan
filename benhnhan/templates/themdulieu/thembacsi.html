@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+
+<!-- add-patient24:06-->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    {% block title %}Cập nhập nhân viên{% endblock %}
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <!--[if lt IE 9]>
+		<script src="assets/js/html5shiv.min.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+    <div class="main-wrapper">
+        {% block content %}
+        <div class="page-wrapper">
+            <div class="content">
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        <h4 class="page-title">Thêm Nhân Viên</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        {% if messages %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+{% endif %}
+                        <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label>Họ Tên</label>
+                <input class="form-control" type="text" name="hoten" required placeholder="Nhập họ và tên">
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>Năm sinh</label>
+                <input type="number" class="form-control" name="namsinh" required placeholder="Nhập năm sinh">
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group gender-select">
+                <label class="gen-label">Giới tính:</label>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                        <input type="radio" name="gioitinh" value="Nam" class="form-check-input" required>Nam
+                    </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                        <input type="radio" name="gioitinh" value="Nữ" class="form-check-input" required>Nữ
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>Số điện thoại</label>
+                <input class="form-control" type="text" name="sdt" required 
+       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+       maxlength="11" minlength="10"
+       placeholder="Nhập số điện thoại">
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>Chức vụ</label>
+                <input class="form-control" type="text" name="chucvu" required placeholder="Nhập chức vụ">
+            </div>
+        </div>
+
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label>Địa chỉ</label>
+                <input type="text" class="form-control" name="diachi" required placeholder="Nhập địa chỉ">
+            </div>
+        </div>
+    </div>
+
+    <div class="m-t-20 text-center">
+        <button class="btn btn-primary submit-btn" type="submit">Thêm Nhân Viên</button>
+    </div>
+</form>
+
+                    </div>
+                </div>
+            </div>
+			
+        </div>
+    </div>
+    <div class="sidebar-overlay" data-reff=""></div>
+    <script src="assets/js/jquery-3.2.1.min.js"></script>
+	<script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/jquery.slimscroll.js"></script>
+    <script src="assets/js/select2.min.js"></script>
+	<script src="assets/js/moment.min.js"></script>
+	<script src="assets/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="assets/js/app.js"></script>
+    {% endblock %}
+</body>
+
+
+<!-- add-patient24:07-->
+</html>

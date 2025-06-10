@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+
+<!-- add-patient24:06-->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    {% block title %}Cập nhập danh sách{% endblock %}
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <!--[if lt IE 9]>
+		<script src="assets/js/html5shiv.min.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+    <div class="main-wrapper">
+        {% block content %}
+        <div class="page-wrapper">
+            <div class="content">
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        <h4 class="page-title">Thêm bệnh nhân</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} text-center" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+                        <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-sm-6">
+    <div class="form-group">
+        <label>Họ và tên <span class="text-danger">*</span></label>
+        <input class="form-control" type="text" name="hovaten" value="{{ benhnhan.HoVaTen }}" readonly>
+    </div>
+</div>
+
+<div class="col-sm-6">
+    <div class="form-group">
+        <label>Năm sinh</label>
+        <input type="text" class="form-control" name="namsinh" value="{{ benhnhan.NamSinh }}" readonly>
+    </div>
+</div>
+
+<div class="col-sm-6">
+    <div class="form-group gender-select">
+        <label class="gen-label">Giới tính:</label>
+        <div class="form-check-inline">
+            <label class="form-check-label">
+                <input type="radio" name="gender" class="form-check-input" value="M" {% if benhnhan.GioiTinh == 'M' %}checked{% endif %} disabled> Nam
+            </label>
+        </div>
+        <div class="form-check-inline">
+            <label class="form-check-label">
+                <input type="radio" name="gender" class="form-check-input" value="F" {% if benhnhan.GioiTinh == 'F' %}checked{% endif %} disabled> Nữ
+            </label>
+        </div>
+    </div>
+</div>
+
+<div class="col-sm-6">
+    <div class="form-group">
+        <label>Khu</label>
+        <select class="form-control" name="khu" disabled>
+            <option value="">-- Chọn khu --</option>
+            <option value="Khu 1" {% if benhnhan.Khu == 'Khu 1' %}selected{% endif %}>Khu 1</option>
+            <option value="Khu 2" {% if benhnhan.Khu == 'Khu 2' %}selected{% endif %}>Khu 2</option>
+            <option value="Khu 3" {% if benhnhan.Khu == 'Khu 3' %}selected{% endif %}>Khu 3</option>
+        </select>
+    </div>
+</div>
+
+        <div class="col-sm-6">
+    <div class="form-group">
+        <label>Thuốc</label>
+        <input type="text" class="form-control" name="thuoc" value="{{ danhsach.Thuoc|default_if_none:'' }}">
+    </div>
+</div>
+
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>Ngày khám</label>
+                <input type="date" class="form-control" name="ngayKham" value="{{ danhsach.NgayKham|date:'Y-m-d' }}">
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>Ngày tái khám</label>
+                <input type="date" class="form-control" name="ngayTaiKham" value="{{ danhsach.NgayTaiKham|date:'Y-m-d' }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="m-t-20 text-center">
+        <button class="btn btn-primary submit-btn">Lưu bệnh nhân</button>
+    </div>
+</form>
+                    </div>
+                </div>
+            </div>
+			
+        </div>
+    </div>
+    <div class="sidebar-overlay" data-reff=""></div>
+    <script src="assets/js/jquery-3.2.1.min.js"></script>
+	<script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/jquery.slimscroll.js"></script>
+    <script src="assets/js/select2.min.js"></script>
+	<script src="assets/js/moment.min.js"></script>
+	<script src="assets/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="assets/js/app.js"></script>
+    {% endblock %}
+</body>
+
+
+<!-- add-patient24:07-->
+</html>

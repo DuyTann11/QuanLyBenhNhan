@@ -1,0 +1,340 @@
+ {% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <!-- patients23:17 -->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0" />
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/img/favicon.ico' %}" />
+    <title>Preclinic - Medical & Hospital - Bootstrap 4 Admin Template</title>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/font-awesome.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/select2.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/dataTables.bootstrap4.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap-datetimepicker.min.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}" />
+    <!--  [if lt IE 9]>
+		<script src="assets/js/html5shiv.min.js"></script>
+		<script src="assets/js/respond.min.js"></script>
+	<![endif]  -->
+  </head>
+
+  <body>
+    <div class="main-wrapper">
+      {% block content %}
+      <div class="page-wrapper">
+        <div class="content">
+          <div class="row">
+            <div class="col-sm-4 col-3">
+              <h4 class="page-title">Danh sách bệnh nhân</h4>
+            </div>
+            <div class="col-sm-8 col-9 text-right m-b-20">
+              <a href="/thembenhnhan/" class="btn btn btn-primary btn-rounded float-right"><i class="fa fa-plus"></i> Thêm bệnh nhân</a>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="table-responsive">
+                <table class="table table-border table-striped custom-table datatable mb-0">
+  <thead>
+    <tr>
+      <th>Họ và tên</th>
+      <th>Năm sinh</th>
+      <th>Giới tính</th>
+      <th>Khu</th>
+      <th>Tiền sử bệnh</th>
+      <th class="text-right">Hành động</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Nguyễn Văn An
+      </td>
+      <td>1985</td>
+      <td>Nam</td>
+      <td>Khu A</td>
+      <td>Tăng huyết áp</td>
+     <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Văn An')">Xem</button>
+</td>
+    </tr>
+    
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Trần Thị Bình
+      </td>
+      <td>1990</td>
+      <td>Nữ</td>
+      <td>Khu B</td>
+      <td>Tiểu đường</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Lê Minh Tuấn
+      </td>
+      <td>1978</td>
+      <td>Nam</td>
+      <td>Khu C</td>
+      <td>Hen suyễn</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Phạm Thị Lan
+      </td>
+      <td>2000</td>
+      <td>Nữ</td>
+      <td>Khu A</td>
+      <td>Không</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Đỗ Văn Hùng
+      </td>
+      <td>1967</td>
+      <td>Nam</td>
+      <td>Khu B</td>
+      <td>Bệnh tim</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+
+    <!-- Thêm 10 bệnh nhân nữa -->
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Hoàng Thị Mai
+      </td>
+      <td>1988</td>
+      <td>Nữ</td>
+      <td>Khu C</td>
+      <td>Viêm gan</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Bùi Văn Đức
+      </td>
+      <td>1975</td>
+      <td>Nam</td>
+      <td>Khu A</td>
+      <td>Ung thư</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Nguyễn Thị Hương
+      </td>
+      <td>1982</td>
+      <td>Nữ</td>
+      <td>Khu B</td>
+      <td>Tiền sử dị ứng</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Trương Văn Nam
+      </td>
+      <td>1995</td>
+      <td>Nam</td>
+      <td>Khu C</td>
+      <td>Không</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Phan Thị Thu
+      </td>
+      <td>1998</td>
+      <td>Nữ</td>
+      <td>Khu A</td>
+      <td>Huyết áp thấp</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Vũ Văn Sơn
+      </td>
+      <td>1969</td>
+      <td>Nam</td>
+      <td>Khu B</td>
+      <td>Tiền sử tim mạch</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Lý Thị Ngọc
+      </td>
+      <td>1993</td>
+      <td>Nữ</td>
+      <td>Khu C</td>
+      <td>Không</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Đặng Văn Hải
+      </td>
+      <td>1980</td>
+      <td>Nam</td>
+      <td>Khu A</td>
+      <td>Tiểu đường</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+    <tr>
+      <td>
+        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" /> Nguyễn Thị Dung
+      </td>
+      <td>1991</td>
+      <td>Nữ</td>
+      <td>Khu B</td>
+      <td>Hen suyễn</td>
+      <td class="text-right">
+  <button class="btn btn-sm btn-primary" onclick="showChart('Nguyễn Thị Dung')">Xem</button>
+</td>
+    </tr>
+  </tbody>
+</table>
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="chartModal" tabindex="-1" role="dialog" aria-labelledby="chartModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="chartModalLabel">Biểu đồ huyết áp</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <canvas id="bloodPressureChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    </div>
+    <div class="sidebar-overlay" data-reff=""></div>
+    <script src="{% static 'assets/js/jquery-3.2.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/popper.min.js' %}"></script>
+    <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery.slimscroll.js' %}"></script>
+    <script src="{% static 'assets/js/select2.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'assets/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'assets/js/moment.min.js' %}"></script>
+    <script src="{% static 'assets/js/bootstrap-datetimepicker.min.js' %}"></script>
+    <script src="{% static 'assets/js/app.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+  const bloodPressureData = {
+    "Nguyễn Văn An": {
+      labels: ["01/08", "02/08", "03/08", "04/08"],
+      systolic: [130, 135, 128, 132],     // Tâm thu
+      diastolic: [85, 88, 80, 82]         // Tâm trương
+    },
+    "Nguyễn Thị Dung": {
+      labels: ["01/08", "02/08", "03/08", "04/08"],
+      systolic: [120, 125, 118, 122],
+      diastolic: [78, 80, 75, 76]
+    }
+  };
+
+  let chartInstance = null;
+
+  function showChart(name) {
+    const data = bloodPressureData[name];
+
+    if (!data) {
+      alert("Chưa có dữ liệu huyết áp cho người này.");
+      return;
+    }
+
+    $('#chartModal').modal('show');
+    document.getElementById("chartModalLabel").innerText = `Biểu đồ huyết áp - ${name}`;
+
+    const ctx = document.getElementById("bloodPressureChart").getContext("2d");
+
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: data.labels,
+        datasets: [
+          {
+            label: "Huyết áp tâm thu (mmHg)",
+            data: data.systolic,
+            backgroundColor: "rgba(255, 99, 132, 0.6)",
+            borderColor: "rgba(255, 99, 132, 1)",
+            borderWidth: 1
+          },
+          {
+            label: "Huyết áp tâm trương (mmHg)",
+            data: data.diastolic,
+            backgroundColor: "rgba(54, 162, 235, 0.6)",
+            borderColor: "rgba(54, 162, 235, 1)",
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            suggestedMax: 180
+          }
+        }
+      }
+    });
+  }
+</script>
+    <script>
+  $(document).ready(function () {
+    
+    // Kích hoạt dropdown nếu chưa hoạt động
+    $('.dropdown-toggle').dropdown();
+    $('div.dataTables_length select').css('width', '50px');
+    
+    
+  });
+  
+</script>
+     {% endblock %}
+  </body>
+
+  <!-- patients23:19 -->
+</html>
