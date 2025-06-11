@@ -9,7 +9,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
     <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
-    {% block title %}Thêm tài khoản{% endblock %}
+    {% block title %}Đổi mật khẩu{% endblock %}
     <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="assets/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="assets/css/select2.min.css">
@@ -28,7 +28,7 @@
             <div class="content">
                 <div class="row">
                     <div class="col-lg-8 offset-lg-2">
-                        <h4 class="page-title">Thêm tài khoản</h4>
+                        <h4 class="page-title">Đổi mật khẩu</h4>
                     </div>
                 </div>
                 <div class="row">
@@ -70,8 +70,9 @@
     {% if success %}
         <div class="alert alert-success mt-2">{{ success }}</div>
     {% endif %}
-
-    <button type="submit" class="btn btn-primary mt-3">Đổi mật khẩu</button>
+<div class="m-t-20 text-center">
+    <button  type="submit" class="btn btn-primary submit-btn">Đổi mật khẩu</button>
+     </div>
 </form>
                     </div>
                 </div>

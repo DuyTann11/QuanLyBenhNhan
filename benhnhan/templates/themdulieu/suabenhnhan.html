@@ -62,9 +62,17 @@
 
         <div class="col-sm-6">
             <div class="form-group">
-                <label>Khu</label>
-                <input class="form-control" type="text" name="Khu" value="{{ benhnhan.Khu }}">
-            </div>
+    <label for="Khu">Chọn nhà (trong khu)</label>
+    <select class="form-control" name="Khu" required>
+        <option value="">-- Chọn nhà --</option>
+        {% for nha in ds_nha %}
+            <option value="{{ nha.id }}" {% if benhnhan.Khu and benhnhan.Khu.id == nha.id %}selected{% endif %}>
+                {{ nha.TenNha }} - {{ nha.Khu.TenKhu }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+
         </div>
 
         <div class="col-sm-6">

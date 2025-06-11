@@ -37,13 +37,13 @@
           <input
   type="text"
   id="searchAll"
-  placeholder="Tìm theo tên, giới tính, hoặc khu..."
-  style="padding:5px; width: 300px; margin-bottom: 15px;"
+  placeholder="🔍 Tìm theo tất cả"
+  class="search-input"
 />
           <form method="get" id="filter-form" class="mb-3">
  <label>
   <input type="radio" name="trang_thai" value="Hoạt động"
-         {% if trang_thai == "Hoạt động" or not trang_thai %}checked{% endif %}
+         {% if trang_thai == "Hoạt động" or trang_thai == None %}checked{% endif %}
          onchange="this.form.submit()"> Hoạt động
 </label>
 &nbsp;&nbsp;
@@ -54,7 +54,7 @@
 </label>
 &nbsp;&nbsp;
 <label>
-  <input type="radio" name="trang_thai" value=""
+  <input type="radio" name="trang_thai" value="Tất cả"
          {% if trang_thai == "Tất cả" %}checked{% endif %}
          onchange="this.form.submit()"> Tất cả
 </label>
@@ -145,6 +145,7 @@
 
     for (let row of tableBody.rows) {
       const name = row.cells[0].innerText.toLowerCase();  // Họ và tên (có hình)
+      const gender = row.cells[1].innerText.toLowerCase();
       const gender = row.cells[2].innerText.toLowerCase(); // Giới tính
       const khu = row.cells[3].innerText.toLowerCase();    // Khu
 

@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/img/favicon.ico' %}">
+    {% block title %}Thêm Khu hoặc Nhà{% endblock %}
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/select2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap-datetimepicker.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
+    <!--[if lt IE 9]>
+        <script src="{% static 'assets/js/html5shiv.min.js' %}"></script>
+        <script src="{% static 'assets/js/respond.min.js' %}"></script>
+    <![endif]-->
+</head>
+<body>
+    <div class="main-wrapper">
+        {% block content %}
+        <div class="page-wrapper">
+            <div class="content">
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        <h4 class="page-title">Thêm Khu hoặc Nhà</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        {% if messages %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        {% endif %}
+                        <form method="POST">
+    {% csrf_token %}
+    {% if messages %}
+        <div class="alert alert-dismissible">
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label>Chọn loại thêm:</label>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="is_khu" name="is_khu" {% if is_khu_checked %}checked{% endif %} onchange="toggleForm()">
+                    <label class="form-check-label" for="is_khu">Thêm khu (Bỏ chọn để thêm nhà)</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trường cho Thêm Khu -->
+        <div class="col-sm-12" id="khu_fields">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label>Tên Khu</label>
+                    <input class="form-control" type="text" name="TenKhu" id="ten_khu">
+                    {% if err_ten_khu %}
+                        <small class="text-danger">{{ err_ten_khu }}</small>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group gender-select">
+                    <label class="gen-label">Trạng thái:</label>
+                    <div class="form-check-inline">
+                        <input type="radio" class="form-check-input" id="trang_thai_khu_hoat_dong" name="TrangThaiKhu" value="Hoạt động" checked>
+                        <label class="form-check-label" for="trang_thai_khu_hoat_dong">Hoạt động</label>
+                    </div>
+                    <div class="form-check-inline">
+                        <input type="radio" class="form-check-input" id="trang_thai_khu_dang_sua" name="TrangThaiKhu" value="Đang sửa">
+                        <label class="form-check-label" for="trang_thai_khu_dang_sua">Đang sửa</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trường cho Thêm Nhà -->
+        <div class="col-sm-12" id="nha_fields">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label>Tên Nhà</label>
+                    <input class="form-control" type="text" name="TenNha" id="ten_nha">
+                    {% if err_ten_nha %}
+                        <small class="text-danger">{{ err_ten_nha }}</small>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label>Chọn Khu</label>
+                    <select class="form-control" name="Khu" id="khu">
+                        <option value="">-- Chọn khu --</option>
+                        {% for khu in ds_khu %}
+                            <option value="{{ khu.id }}">{{ khu.TenKhu }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if err_khu %}
+                        <small class="text-danger">{{ err_khu }}</small>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group gender-select">
+                    <label class="gen-label">Trạng thái:</label>
+                    <div class="form-check-inline">
+                        <input type="radio" class="form-check-input" id="trang_thai_nha_hoat_dong" name="TrangThaiNha" value="Hoạt động" checked>
+                        <label class="form-check-label" for="trang_thai_nha_hoat_dong">Hoạt động</label>
+                    </div>
+                    <div class="form-check-inline">
+                        <input type="radio" class="form-check-input" id="trang_thai_nha_dang_sua" name="TrangThaiNha" value="Đang sửa">
+                        <label class="form-check-label" for="trang_thai_nha_dang_sua">Đang sửa</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="m-t-20 text-center">
+        <button class="btn btn-primary submit-btn" type="submit">Thêm</button>
+    </div>
+</form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-overlay" data-reff=""></div>
+        <script src="{% static 'assets/js/jquery-3.2.1.min.js' %}"></script>
+        <script src="{% static 'assets/js/popper.min.js' %}"></script>
+        <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'assets/js/jquery.slimscroll.js' %}"></script>
+        <script src="{% static 'assets/js/select2.min.js' %}"></script>
+        <script src="{% static 'assets/js/moment.min.js' %}"></script>
+        <script src="{% static 'assets/js/bootstrap-datetimepicker.min.js' %}"></script>
+        <script src="{% static 'assets/js/app.js' %}"></script>
+        <script>
+function toggleForm() {
+    var isKhu = document.getElementById('is_khu').checked;
+    var khuFields = document.getElementById('khu_fields');
+    var nhaFields = document.getElementById('nha_fields');
+    var tenKhu = document.getElementById('ten_khu');
+    var tenNha = document.getElementById('ten_nha');
+    var khuSelect = document.getElementById('khu');
+
+    // Hiển thị/ẩn các trường
+    khuFields.style.display = isKhu ? 'block' : 'none';
+    nhaFields.style.display = isKhu ? 'none' : 'block';
+
+    // Bật/tắt thuộc tính required
+    tenKhu.required = isKhu;
+    tenNha.required = !isKhu;
+    khuSelect.required = !isKhu;
+}
+
+// Khởi tạo trạng thái ban đầu dựa trên is_khu_checked từ server
+window.onload = function() {
+    toggleForm();
+};
+</script>
+        {% endblock %}
+</body>
+</html>

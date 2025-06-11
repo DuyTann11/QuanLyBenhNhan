@@ -4286,6 +4286,27 @@ blockquote p {
 	37. Video Call
 -----------------------*/
 
+.search-input {
+  width: 300px;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-bottom: 12px;
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+.search-input:focus {
+  border-color: #3b82f6; /* màu xanh dương nhạt */
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+}
+
 .content-full {
 	height: 100%;
 	position: relative;

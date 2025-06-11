@@ -33,11 +33,11 @@
                     </div>
                    
                 </div>
-                <input
+                 <input
   type="text"
   id="searchAll"
-  placeholder="Tìm theo tên, giới tính, hoặc khu..."
-  style="padding:5px; width: 300px; margin-bottom: 15px;"
+  placeholder="🔍 Tìm theo tên, giới tính, hoặc khu"
+  class="search-input"
 />
 				<div class="row">
 					<div class="col-md-12">
@@ -92,11 +92,14 @@
         
     </tbody>
 </table>
-<div style="margin-top: 20px; text-align: right;">
+<div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <div id="checkboxKhuContainer" style="margin: 20px 0;"></div>
+    </div>
     <button onclick="exportToExcel()" style="padding: 10px 20px; font-weight: bold; background-color: #4CAF50; color: white; border: none; cursor: pointer;">
-      Xuất Excel
+        Xuất Excel
     </button>
-  </div>
+</div>
 
 						</div>
 					</div>
@@ -128,43 +131,99 @@
             });
      </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+function taoCheckboxKhu() {
+  const khuSet = new Set();
+  const rows = document.querySelectorAll("table tbody tr");
+
+  rows.forEach(row => {
+    const khu = row.cells[4]?.innerText.trim(); // Cột "Khu"
+    if (khu) khuSet.add(khu);
+  });
+
+  const container = document.getElementById("checkboxKhuContainer");
+  container.innerHTML = `
+    <strong>Chọn khu muốn xuất:</strong><br>
+    <input type="checkbox" id="checkAllKhu" onclick="toggleChonTatCaKhu(this)">
+    <label for="checkAllKhu" style="margin-right: 15px;">Chọn tất cả</label><br>
+  `;
+
+  khuSet.forEach(khu => {
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "khuCheckbox";
+    checkbox.value = khu;
+    checkbox.id = `khu_${khu}`;
+
+    const label = document.createElement("label");
+    label.htmlFor = `khu_${khu}`;
+    label.style.marginRight = "15px";
+    label.style.marginLeft = "5px";
+    label.appendChild(document.createTextNode(khu));
+
+    container.appendChild(checkbox);
+    container.appendChild(label);
+  });
+
+  // Tự động bỏ chọn "Chọn tất cả" nếu một checkbox bị bỏ
+  document.querySelectorAll('input[name="khuCheckbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const allCheckboxes = document.querySelectorAll('input[name="khuCheckbox"]');
+      const allChecked = Array.from(allCheckboxes).every(c => c.checked);
+      document.getElementById("checkAllKhu").checked = allChecked;
+    });
+  });
+}
+
+function toggleChonTatCaKhu(masterCheckbox) {
+  const checkboxes = document.querySelectorAll('input[name="khuCheckbox"]');
+  checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+}
+
+window.onload = taoCheckboxKhu;
+</script>
 
 <script>
-  function exportToExcel() {
-    const originalTable = document.querySelector("table");
+function exportToExcel() {
+  const selectedKhu = Array.from(document.querySelectorAll('input[name="khuCheckbox"]:checked')).map(cb => cb.value.trim());
 
-    // Clone bảng để không ảnh hưởng DOM gốc
-    const clonedTable = originalTable.cloneNode(true);
-
-    // Xoá cột cuối (Hoạt động) trong thead
-    const theadRow = clonedTable.querySelector("thead tr");
-    if (theadRow) theadRow.deleteCell(-1);
-
-    // Xoá cột cuối (Hoạt động) trong tbody
-    clonedTable.querySelectorAll("tbody tr").forEach(row => {
-      row.deleteCell(-1);
-    });
-
-    // Chuyển table thành worksheet
-    const worksheet = XLSX.utils.table_to_sheet(clonedTable, {
-      raw: false, // Giữ dữ liệu định dạng
-    });
-
-    // Tạo workbook và gắn worksheet
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSach");
-
-    // Xuất file .xlsx
-    XLSX.writeFile(workbook, "Danh sách uống thuốc.xlsx");
+  if (selectedKhu.length === 0) {
+    alert("Vui lòng chọn ít nhất một khu để xuất.");
+    return;
   }
-  $(document).ready(function () {
-    
-    // Kích hoạt dropdown nếu chưa hoạt động
-    $('.dropdown-toggle').dropdown();
-    $('div.dataTables_length select').css('width', '50px');
-    
-    
+
+  const originalTable = document.querySelector("table");
+  const clonedTable = originalTable.cloneNode(true);
+
+  // Xoá cột "Hoạt động"
+  const theadRow = clonedTable.querySelector("thead tr");
+  if (theadRow) theadRow.deleteCell(-1);
+
+  const tbodyRows = Array.from(clonedTable.querySelectorAll("tbody tr"));
+  let keptRows = 0;
+
+  tbodyRows.forEach(row => {
+    const khu = row.cells[4]?.innerText.trim();
+    if (!selectedKhu.includes(khu)) {
+      row.remove(); // Xoá dòng không phù hợp
+    } else {
+      row.deleteCell(-1); // Xoá cột "Hoạt động"
+      keptRows++;
+    }
   });
+
+  if (keptRows === 0) {
+    alert("Không có dữ liệu khu nào phù hợp để xuất.");
+    return;
+  }
+
+  // Xuất file
+  const worksheet = XLSX.utils.table_to_sheet(clonedTable, { raw: false });
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSach");
+
+  XLSX.writeFile(workbook, "Danh sách uống thuốc.xlsx");
+}
 </script>
 <script>
   const searchAll = document.getElementById('searchAll');
@@ -188,6 +247,17 @@
   }
 
   searchAll.addEventListener('input', filterTable);
+</script>
+<script>
+  $(document).ready(function () {
+    
+    // Kích hoạt dropdown nếu chưa hoạt động
+    $('.dropdown-toggle').dropdown();
+    $('div.dataTables_length select').css('width', '50px');
+    
+    
+  });
+  
 </script>
      {% endblock %}
 </body>

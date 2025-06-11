@@ -40,5 +40,8 @@ urlpatterns = [
     path('suataikhoan/<int:id>/', views.suataikhoan, name='suataikhoan'),
     path('doimatkhau/', views.doimatkhau),
     path('dangxuat/', views.dangxuat, name='dangxuat'),
+    path('khu/', views.khu),
+    path('themnha/', views.themnha),
+    path('suanha/<int:nha_id>/', views.suanha, name='suanha'),
 
 ]

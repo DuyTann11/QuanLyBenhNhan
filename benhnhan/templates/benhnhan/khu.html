@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0" />
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/img/favicon.ico' %}" />
-    {% block title %}Bệnh nhân{% endblock %}
+    {% block title %}Khu ở bệnh nhân{% endblock %}
 
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/font-awesome.min.css' %}" />
@@ -28,34 +28,32 @@
         <div class="content">
           <div class="row">
             <div class="col-sm-4 col-3">
-              <h4 class="page-title">Danh sách bệnh nhân</h4>
+              <h4 class="page-title">Danh sách nhà ở</h4>
             </div>
             <div class="col-sm-8 col-9 text-right m-b-20">
-              <a href="/thembenhnhan/" class="btn btn btn-primary btn-rounded float-right"><i class="fa fa-plus"></i> Thêm bệnh nhân</a>
+              <a href="/themnha/" class="btn btn btn-primary btn-rounded float-right"><i class="fa fa-plus"></i> Thêm nhà ở</a>
             </div>
           </div>
-          <input
+           <input
   type="text"
   id="searchAll"
-  placeholder="🔍 Tìm theo tên, giới tính, hoặc khu..."
+  placeholder="🔍 Tìm theo tất cả"
   class="search-input"
 />
           <form method="get" id="filter-form" class="mb-3">
-  <label>
+<label>
     <input type="radio" name="trang_thai" value="Hoạt động"
-           {% if trang_thai == "Hoạt động" %}checked{% endif %}
+           {% if trang_thai == "Hoạt động" or not trang_thai %}checked{% endif %}
            onchange="this.form.submit()"> Hoạt động
   </label>
-  &nbsp;&nbsp;
   <label>
-    <input type="radio" name="trang_thai" value="Ngưng hoạt động"
-           {% if trang_thai == "Ngưng hoạt động" %}checked{% endif %}
-           onchange="this.form.submit()"> Ngưng hoạt động
+    <input type="radio" name="trang_thai" value="Đang sửa"
+           {% if trang_thai == "Đang sửa" %}checked{% endif %}
+           onchange="this.form.submit()"> Đang sửa
   </label>
-  &nbsp;&nbsp;
   <label>
-    <input type="radio" name="trang_thai" value=""
-           {% if not trang_thai %}checked{% endif %}
+    <input type="radio" name="trang_thai" value="Tất cả"
+           {% if trang_thai == "Tất cả" %}checked{% endif %}
            onchange="this.form.submit()"> Tất cả
   </label>
 </form>
@@ -63,49 +61,41 @@
             <div class="col-md-12">
               <div class="table-responsive">
                 <table class="table table-border table-striped custom-table datatable mb-0">
-                  
   <thead>
     <tr>
-      <th>Họ và tên</th>
-      <th>Năm sinh</th>
-      <th>Giới tính</th>
-      <th>Khu</th>
-      
+      <th>Tên nhà</th>
+      <th>Thuộc khu</th>
+      <th>Trạng Thái</th>
       <th class="text-right">Hành động</th>
-      
     </tr>
   </thead>
   <tbody>
-    {% for item in ds_benhnhan %}
-  <tr>
-    <td>
-      <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" />
-      {{ item.HoVaTen }}
-    </td>
-    <td>{{ item.NamSinh }}</td>
-    <td>{% if item.GioiTinh == 'M' %}Nam{% else %}Nữ{% endif %}</td>
-    <td>{{ item.Khu }}</td>
-    <td class="text-right">
-      <div class="dropdown dropdown-action">
-        {% if request.session.quyen != 'nhanvien' %}
-        <a href="#" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-          <i class="fa fa-ellipsis-v"></i>
-        </a>
-        <div class="dropdown-menu dropdown-menu-right">
-          <a class="dropdown-item" href="{% url 'suabenhnhan' item.BenhNhanID %}"><i class="fa fa-pencil m-r-5"></i>Chỉnh sửa</a>
+    {% for nha in ds_nha %}
+    <tr>
+      <td>{{ nha.TenNha }}</td>
+      <td>{{ nha.Khu.TenKhu }}</td>
+      <td>{{ nha.TrangThai }}</td>
+      <td class="text-right">
+        <div class="dropdown dropdown-action">
+          <a href="#" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+            <i class="fa fa-ellipsis-v"></i>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="{% url 'suanha' nha.id %}">
+                        <i class="fa fa-pencil m-r-5"></i>Chỉnh sửa
+                    </a>
+                </div>
         </div>
-        {% endif %}
-      </div>
-    </td>
-  </tr>
-  {% empty %}
-  <tr>
-    <td colspan="5" class="text-center">Không có bệnh nhân nào</td>
-  </tr>
-  {% endfor %}
-    
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="3" class="text-center">Không có nhà nào</td>
+    </tr>
+    {% endfor %}
   </tbody>
 </table>
+
 
               </div>
             </div>
@@ -144,11 +134,11 @@
     const keyword = this.value.toLowerCase();
 
     for (let row of tableBody.rows) {
-      const name = row.cells[0].innerText.toLowerCase();  // Họ và tên (có hình)
-      const gender = row.cells[2].innerText.toLowerCase(); // Giới tính
-      const khu = row.cells[3].innerText.toLowerCase();    // Khu
+      const tenNha = row.cells[0].innerText.toLowerCase();  // Tên Nhà
+      const khu = row.cells[1].innerText.toLowerCase();     // Khu
+      const trangThai = row.cells[2].innerText.toLowerCase(); // Trạng Thái
 
-      if (name.includes(keyword) || gender.includes(keyword) || khu.includes(keyword)) {
+      if (tenNha.includes(keyword) || khu.includes(keyword) || trangThai.includes(keyword)) {
         row.style.display = '';
       } else {
         row.style.display = 'none';

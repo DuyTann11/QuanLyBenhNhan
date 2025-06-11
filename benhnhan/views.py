@@ -9,45 +9,45 @@ from django.utils.dateparse import parse_date
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
-from benhnhan.models import BenhNhan, DanhSachKham, NhanVien, TaiKhoan
+from benhnhan.models import BenhNhan, DanhSachKham, KhuNha, Nha, NhanVien, TaiKhoan
 from core import settings
 
 # Create your views here.
 def trangchu(request):
     if 'ten_dang_nhap' not in request.session:
         return redirect('/dangnhap/')
+    
     soNhanVienDangLam = NhanVien.objects.filter(TrangThai="Đang làm").count()
     soBenhNhan = BenhNhan.objects.filter(TrangThai="Hoạt động").count()
     soTaiKhoan = TaiKhoan.objects.filter(TrangThai="hoatdong").count()
+    
     ngayHomNay = timezone.now().date()
     ngayMai = ngayHomNay + timedelta(days=1)
 
-    # Đếm số người cần tái khám vào ngày mai
-    soNguoiCanTaiKham = DanhSachKham.objects.filter(NgayTaiKham=ngayHomNay) \
+    # 🔁 Cập nhật logic so sánh với ngày mai
+    soNguoiCanTaiKham = DanhSachKham.objects.filter(NgayTaiKham=ngayMai) \
         .values('BenhNhan').distinct().count()
 
-    # Danh sách khám của bệnh nhân hoạt động, không tái khám vào ngày mai
     danhsach = DanhSachKham.objects.select_related('BenhNhan') \
         .filter(BenhNhan__TrangThai='Hoạt động') \
         .exclude(NgayTaiKham=ngayMai)
 
-    # Đếm bệnh nhân có đơn thuốc trong ngày hôm nay
     soNguoiCanUongThuoc = DanhSachKham.objects.filter(
-        BenhNhan__TrangThai='Hoạt động'
-    ).values('BenhNhan').distinct().count()
-    
+    BenhNhan__TrangThai='Hoạt động',
+    NgayTaiKham__lte=ngayMai  
+        ).values('BenhNhan').distinct().count()
+
     nhanviens = NhanVien.objects.all()
 
     return render(request, 'benhnhan/trangchu.html', {
         'soNhanVienDangLam': soNhanVienDangLam,
         'soBenhNhan': soBenhNhan,
         'soNguoiCanTaiKham': soNguoiCanTaiKham,
-        'ngayTaiKham': ngayHomNay,
+        'ngayTaiKham': ngayMai,  # 👉 Truyền ngày mai thay vì hôm nay
         'danhsach': danhsach,
         'soNguoiCanUongThuoc': soNguoiCanUongThuoc,
         'nhanviens': nhanviens,
         'soTaiKhoan': soTaiKhoan
-
     })
 #trang bệnh nhân
 def benhnhan(request):
@@ -75,14 +75,21 @@ def lichuongthuoc(request):
                 BenhNhan__TrangThai='Hoạt động',
                 NgayTaiKham=today
             )
+    elif filter_option == 'ngaymai':
+        danhsach = DanhSachKham.objects.select_related('BenhNhan') \
+            .filter(
+                BenhNhan__TrangThai='Hoạt động',
+                NgayTaiKham=tomorrow
+            )
     else:
         danhsach = DanhSachKham.objects.select_related('BenhNhan') \
             .filter(BenhNhan__TrangThai='Hoạt động') \
-            .exclude(NgayTaiKham=tomorrow)
+            .exclude(NgayTaiKham=tomorrow)  # lọc tất cả trừ ngày mai
 
     return render(request, 'benhnhan/lichuongthuoc.html', {
         'danhsach': danhsach,
-        'locTheoHomNay': filter_option == 'homnay'  
+        'locTheoNgayMai': filter_option == 'ngaymai',
+        'locTheoHomNay': filter_option == 'homnay'
     })
 #trang bác sĩ
 def bacsi(request):
@@ -224,14 +231,15 @@ def thembenhnhan(request):
         ho_va_ten = request.POST.get('HoVaTen')
         nam_sinh = request.POST.get('NamSinh')
         gioi_tinh = request.POST.get('GioiTinh')
-        khu = request.POST.get('Khu')
+        khu_id = request.POST.get('Khu')  # lấy id nhà
 
+        nha = Nha.objects.get(id=khu_id) if khu_id else None
 
         benhnhan = BenhNhan.objects.create(
             HoVaTen=ho_va_ten,
             NamSinh=nam_sinh,
             GioiTinh=gioi_tinh,
-            Khu=khu,
+            Khu=nha,
             TrangThai='Hoạt động'
         )
 
@@ -245,7 +253,8 @@ def thembenhnhan(request):
         messages.success(request, 'Thêm bệnh nhân thành công!')
         return redirect('/thembenhnhan/') 
 
-    return render(request, 'themdulieu/thembenhnhan.html')
+    ds_nha = Nha.objects.select_related('Khu').all()  # Lấy danh sách các nhà
+    return render(request, 'themdulieu/thembenhnhan.html', {'ds_nha': ds_nha})
 #trang thêm bác sĩ
 def thembacsi(request):
     if request.method == 'POST':
@@ -325,13 +334,18 @@ def suabenhnhan(request, id):
         benhnhan.HoVaTen = request.POST.get('HoVaTen')
         benhnhan.NamSinh = request.POST.get('NamSinh')
         benhnhan.GioiTinh = request.POST.get('GioiTinh')
-        benhnhan.Khu = request.POST.get('Khu')
+        khu_id = request.POST.get('Khu')
+        benhnhan.Khu = Nha.objects.get(id=khu_id) if khu_id else None
         benhnhan.TrangThai = request.POST.get('TrangThai')  
         benhnhan.save()
-        messages.success(request, 'Cập nhật bệnh nhân thành công!')
-       
 
-    return render(request, 'themdulieu/suabenhnhan.html', {'benhnhan': benhnhan})
+        messages.success(request, 'Cập nhật bệnh nhân thành công!')
+
+    ds_nha = Nha.objects.select_related('Khu').all()
+    return render(request, 'themdulieu/suabenhnhan.html', {
+        'benhnhan': benhnhan,
+        'ds_nha': ds_nha
+    })
 #trang sửa bác sĩ 
 def suabacsi(request, id):
     nhanvien = get_object_or_404(NhanVien, pk=id)
@@ -475,3 +489,144 @@ def doimatkhau(request):
             context['success'] = "Đổi mật khẩu thành công!"
 
     return render(request, 'taikhoan/doimatkhau.html', context)
+
+#trang khu nhà ở 
+def khu(request):
+    trang_thai = request.GET.get('trang_thai', 'Hoạt động')  # Mặc định là 'Hoạt động'
+    
+    # Lọc danh sách nhà theo trạng thái
+    if trang_thai == 'Tất cả':
+        ds_nha = Nha.objects.select_related('Khu').all()
+    else:
+        ds_nha = Nha.objects.select_related('Khu').filter(TrangThai=trang_thai)
+    
+    return render(request, 'benhnhan/khu.html', {
+        'ds_nha': ds_nha,
+        'trang_thai': trang_thai
+    })
+
+#trang thêm nhà ở
+def themnha(request):
+    err_ten_khu = ''
+    err_ten_nha = ''
+    err_khu = ''
+    is_khu_checked = False 
+
+    if request.method == 'POST':
+        is_khu = 'is_khu' in request.POST
+        is_khu_checked = is_khu  
+
+        if is_khu:
+            ten_khu = request.POST.get('TenKhu')
+            trang_thai = request.POST.get('TrangThaiKhu')
+            if ten_khu:
+                try:
+                    if KhuNha.objects.filter(TenKhu=ten_khu).exists():
+                        err_ten_khu = 'Tên khu đã tồn tại.'
+                    else:
+                        KhuNha.objects.create(TenKhu=ten_khu, TrangThai=trang_thai)
+                        messages.success(request, 'Thêm khu thành công!')
+                        is_khu_checked = False 
+                except Exception as e:
+                    messages.error(request, f'Lỗi khi thêm khu: {str(e)}')
+            else:
+                err_ten_khu = 'Vui lòng nhập tên khu.'
+        else:
+            ten_nha = request.POST.get('TenNha')
+            khu_id = request.POST.get('Khu')
+            trang_thai = request.POST.get('TrangThaiNha')
+            if ten_nha and khu_id:
+                try:
+                    khu = KhuNha.objects.get(id=khu_id)
+                    if Nha.objects.filter(TenNha=ten_nha, Khu=khu).exists():
+                        err_ten_nha = 'Tên nhà đã tồn tại trong khu này.'
+                    else:
+                        Nha.objects.create(TenNha=ten_nha, Khu=khu, TrangThai=trang_thai)
+                        messages.success(request, 'Thêm nhà thành công!')
+                        is_khu_checked = False  
+                except Exception as e:
+                    messages.error(request, f'Lỗi khi thêm nhà: {str(e)}')
+            else:
+                if not ten_nha:
+                    err_ten_nha = 'Vui lòng nhập tên nhà.'
+                if not khu_id:
+                    err_khu = 'Vui lòng chọn khu.'
+
+    ds_khu = KhuNha.objects.all()
+    return render(request, 'themdulieu/themnha.html', {
+        'ds_khu': ds_khu,
+        'err_ten_khu': err_ten_khu,
+        'err_ten_nha': err_ten_nha,
+        'err_khu': err_khu,
+        'is_khu_checked': is_khu_checked 
+    })
+
+#trang sửa nhà 
+def suanha(request, nha_id):
+    nha = get_object_or_404(Nha, id=nha_id)
+    ds_khu = KhuNha.objects.all()
+    err_ten_khu = ''
+    err_ten_nha = ''
+    err_khu = ''
+    is_khu_checked = False
+
+    if request.method == 'POST':
+        is_khu = 'is_khu' in request.POST
+        is_khu_checked = is_khu
+
+        if is_khu:
+            # Sửa khu
+            ten_khu = request.POST.get('TenKhu')
+            trang_thai = request.POST.get('TrangThaiKhu')
+            if ten_khu:
+                try:
+                    # Kiểm tra trùng tên khu, ngoại trừ khu hiện tại
+                    existing_khu = KhuNha.objects.filter(TenKhu=ten_khu).exclude(id=nha.Khu.id).first()
+                    if existing_khu:
+                        err_ten_khu = f'Tên khu "{ten_khu}" đã tồn tại (ID: {existing_khu.id}). Vui lòng chọn tên khác.'
+                    else:
+                        # Cập nhật thông tin khu
+                        nha.Khu.TenKhu = ten_khu
+                        nha.Khu.TrangThai = trang_thai
+                        nha.Khu.save()
+                        # Đồng bộ trạng thái của tất cả nhà trong khu
+                        Nha.objects.filter(Khu=nha.Khu).update(TrangThai=trang_thai)
+                        messages.success(request, f'Cập nhật khu "{ten_khu}" thành công!')
+                        return redirect('themnha')
+                except Exception as e:
+                    messages.error(request, f'Lỗi khi cập nhật khu: {str(e)}')
+            else:
+                err_ten_khu = 'Vui lòng nhập tên khu.'
+        else:
+            # Sửa nhà
+            ten_nha = request.POST.get('TenNha')
+            khu_id = request.POST.get('Khu')
+            trang_thai = request.POST.get('TrangThaiNha')
+            if ten_nha and khu_id:
+                try:
+                    khu = KhuNha.objects.get(id=khu_id)
+                    if Nha.objects.filter(TenNha=ten_nha, Khu=khu).exclude(id=nha_id).exists():
+                        err_ten_nha = f'Tên nhà "{ten_nha}" đã tồn tại trong khu "{khu.TenKhu}".'
+                    else:
+                        nha.TenNha = ten_nha
+                        nha.Khu = khu
+                        nha.TrangThai = trang_thai
+                        nha.save()
+                        messages.success(request, f'Cập nhật nhà "{ten_nha}" thành công!')
+                        return redirect('themnha')
+                except Exception as e:
+                    messages.error(request, f'Lỗi khi cập nhật nhà: {str(e)}')
+            else:
+                if not ten_nha:
+                    err_ten_nha = 'Vui lòng nhập tên nhà.'
+                if not khu_id:
+                    err_khu = 'Vui lòng chọn khu.'
+
+    return render(request, 'themdulieu/suanha.html', {
+        'nha': nha,
+        'ds_khu': ds_khu,
+        'err_ten_khu': err_ten_khu,
+        'err_ten_nha': err_ten_nha,
+        'err_khu': err_khu,
+        'is_khu_checked': is_khu_checked
+    })

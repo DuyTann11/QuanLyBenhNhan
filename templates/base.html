@@ -23,7 +23,7 @@
   <body>
     <div class="header">
       <div class="header-left">
-        <a href="index-2.html" class="logo"><img src="{% static 'assets/img/logo.png' %}" width="35" height="35" alt="" /> <span>Preclinic</span></a>
+        <a href="/" class="logo"><img src="{% static 'assets/img/logo.png' %}" width="35" height="35" alt="" /> <span>Preclinic</span></a>
       </div>
       <a id="toggle_btn" href="javascript:void(0);"><i class="fa fa-bars"></i></a>
       <a id="mobile_btn" class="mobile_btn float-left" href="#sidebar"><i class="fa fa-bars"></i></a>
@@ -57,7 +57,7 @@
         <div id="sidebar-menu" class="sidebar-menu">
           <ul>
             <li class="menu-title">Chính</li>
-            <li class="active">
+            <li >
               <a href="/"><i class="fa fa-dashboard"></i> <span>Bảng Điều Khiển</span></a>
             </li>
             <li>
@@ -69,6 +69,11 @@
             <li>
               <a href="/lichuongthuoc/"><i class="fa fa-calendar"></i> <span>Lịch Uống Thuốc</span></a>
             </li>
+            {% if request.session.quyen != 'nhanvien' %}
+            <li>
+              <a href="/khu/"><i class="fa fa fa-home"></i> <span>Khu Ở Bệnh Nhân</span></a>
+            </li>
+            {% endif %}
              {% if request.session.quyen != 'nhanvien' %}
 <li>
   <a href="/taikhoan/"><i class="fa fa-user"></i> <span>Tài khoản</span></a>
@@ -94,10 +99,41 @@
     <script src="{% static 'assets/js/chart.js' %}"></script>
     <script src="{% static 'assets/js/app.js' %}"></script>
     <script>
+$(document).ready(function() {
+
+    $('#mobile_btn').on('click', function(e) {
+        e.preventDefault();
+        $('#sidebar').toggleClass('active');
+        $('.sidebar-overlay').toggleClass('active');
+    });
+
+
+    $('#toggle_btn').on('click', function(e) {
+        e.preventDefault();
+        $('#sidebar').toggleClass('active');
+
+    });
+
+
+    $('.sidebar-overlay').on('click', function() {
+        $('#sidebar').removeClass('active');
+        $(this).removeClass('active');
+    });
+
+
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#sidebar, #mobile_btn, #toggle_btn').length) {
+            $('#sidebar').removeClass('active');
+            $('.sidebar-overlay').removeClass('active');
+        }
+    });
+});
+</script>
+    <script>
       $(document).ready(function () {
         var currentUrl = window.location.pathname
       
-        $('.sidebar-menu li').removeClass('active') // Xoá hết active cũ
+        $('.sidebar-menu li').removeClass('active') 
       
         $('.sidebar-menu li').each(function () {
           var link = $(this).find('a').attr('href')
@@ -107,10 +143,10 @@
           }
         })
       
-        // Khi click vào menu khác
+
         $('.sidebar-menu li a').on('click', function () {
-          $('.sidebar-menu li').removeClass('active') // Xoá active tất cả
-          $(this).parent().addClass('active') // Thêm active vào cái vừa click
+          $('.sidebar-menu li').removeClass('active') 
+          $(this).parent().addClass('active') 
         })
       })
     </script>

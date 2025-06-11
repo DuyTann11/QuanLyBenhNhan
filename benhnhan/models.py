@@ -14,7 +14,7 @@ class BenhNhan(models.Model):
     ]
     GioiTinh = models.CharField(max_length=1, choices=GIOI_TINH_CHOICES)
     
-    Khu = models.CharField(max_length=100, blank=True, null=True)  
+    Khu = models.ForeignKey('Nha', on_delete=models.SET_NULL, null=True, blank=True)
     
     NgayTaoHoSo = models.DateTimeField(auto_now_add=True)
     
@@ -84,3 +84,36 @@ class TaiKhoan(models.Model):
 
     def __str__(self):
         return self.TenDangNhap
+    
+# Bảng Khu
+class KhuNha(models.Model):
+    STATUS_CHOICES = (
+        ('Hoạt động', 'Hoạt động'),
+        ('Đang sửa', 'Đang sửa'),
+    )
+    
+    id = models.AutoField(primary_key=True)
+    TenKhu = models.CharField(max_length=100, unique=True)
+    TrangThai = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Hoạt động')
+
+    def __str__(self):
+        return self.TenKhu
+
+# Bảng Nhà
+class Nha(models.Model):
+    STATUS_CHOICES = (
+        ('Hoạt động', 'Hoạt động'),
+        ('Đang sửa', 'Đang sửa'),
+    )
+    
+    id = models.AutoField(primary_key=True)
+    TenNha = models.CharField(max_length=100)
+    Khu = models.ForeignKey(KhuNha, on_delete=models.CASCADE, related_name='ds_nha')
+    TrangThai = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Hoạt động')
+
+    class Meta:
+        unique_together = ('TenNha', 'Khu')  
+
+    def __str__(self):
+        return f"{self.TenNha} - {self.Khu.TenKhu}"
+    

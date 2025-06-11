@@ -61,11 +61,16 @@
         </div>
 
         <div class="col-sm-6">
-            <div class="form-group">
-                <label>Khu</label>
-                <input class="form-control" type="text" name="Khu">
-            </div>
-        </div>
+    <div class="form-group">
+        <label for="Khu">Chọn nhà (trong khu)</label>
+        <select class="form-control" name="Khu" required>
+            <option value="">-- Chọn nhà --</option>
+            {% for nha in ds_nha %}
+                <option value="{{ nha.id }}">{{ nha.TenNha }} - {{ nha.Khu.TenKhu }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
 
         <div class="col-sm-6">
             <div class="form-group gender-select">
