@@ -182,7 +182,39 @@ function toggleChonTatCaKhu(masterCheckbox) {
 
 window.onload = taoCheckboxKhu;
 </script>
+<script>
+function locTheoKhu() {
+  const checkedValues = Array.from(document.querySelectorAll('input[name="khuCheckbox"]:checked'))
+    .map(cb => cb.value);
 
+  const rows = document.querySelectorAll("table tbody tr");
+
+  rows.forEach(row => {
+    const khu = row.cells[4]?.innerText.trim();
+    if (checkedValues.length === 0 || checkedValues.includes(khu)) {
+      row.style.display = ""; // Hiện ra
+    } else {
+      row.style.display = "none"; // Ẩn đi
+    }
+  });
+}
+
+// Gọi locTheoKhu mỗi khi checkbox thay đổi
+function ganSuKienLocTheoKhu() {
+  const checkboxes = document.querySelectorAll('input[name="khuCheckbox"]');
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', locTheoKhu);
+  });
+}
+
+window.onload = function () {
+  taoCheckboxKhu();         // Tạo checkbox từ cột Khu
+  setTimeout(() => {
+    locTheoKhu();           // Áp dụng lọc ngay từ đầu nếu cần
+    ganSuKienLocTheoKhu();  // Gắn sự kiện lọc mỗi khi checkbox thay đổi
+  }, 100); // Chờ chút cho checkbox được render xong
+};
+</script>
 <script>
 function exportToExcel() {
   const selectedKhu = Array.from(document.querySelectorAll('input[name="khuCheckbox"]:checked')).map(cb => cb.value.trim());

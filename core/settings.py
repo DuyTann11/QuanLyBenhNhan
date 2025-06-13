@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-dxw7sz67z@vem3vqiz(xokjvz^458%0ln_o4cj*4dmi!y*4&^c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -74,17 +74,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'QuanLyBenhNhan',
-        'HOST': 'localhost',
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'trusted_connection': 'yes',
-        },
-    }
-}
+DATABASES = { 'default': { 'ENGINE': 'django.db.backends.mysql', 'NAME': 'QuanLyBenhNhan', 'USER': 'root', 'PASSWORD': '', 'HOST': 'localhost', 'PORT': '3306', 'OPTIONS': { 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'", }, } }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

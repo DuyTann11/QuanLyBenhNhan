@@ -32,10 +32,7 @@ def trangchu(request):
         .filter(BenhNhan__TrangThai='Hoạt động') \
         .exclude(NgayTaiKham=ngayMai)
 
-    soNguoiCanUongThuoc = DanhSachKham.objects.filter(
-    BenhNhan__TrangThai='Hoạt động',
-    NgayTaiKham__lte=ngayMai  
-        ).values('BenhNhan').distinct().count()
+    soNguoiCanUongThuoc = danhsach.count()
 
     nhanviens = NhanVien.objects.all()
 
@@ -43,7 +40,7 @@ def trangchu(request):
         'soNhanVienDangLam': soNhanVienDangLam,
         'soBenhNhan': soBenhNhan,
         'soNguoiCanTaiKham': soNguoiCanTaiKham,
-        'ngayTaiKham': ngayMai,  # 👉 Truyền ngày mai thay vì hôm nay
+        'ngayTaiKham': ngayMai,  
         'danhsach': danhsach,
         'soNguoiCanUongThuoc': soNguoiCanUongThuoc,
         'nhanviens': nhanviens,
@@ -131,7 +128,7 @@ def dangxuat(request):
 #trang quenmatkhau
 def generate_otp():
     return str(random.randint(100000, 999999))
-
+#trang quên mật khẩu
 def quenmatkhau(request):
     context = {'sent': False}
     
@@ -190,6 +187,11 @@ def dangki(request):
         context['sdt'] = sdt
         context['gmail'] = gmail
 
+        # Kiểm tra mật khẩu có ít nhất 6 ký tự, 1 chữ hoa, 1 số
+        if not re.match(r'^(?=.*[A-Z])(?=.*\d).{6,}$', matkhau):
+            context['err_matkhau'] = "Mật khẩu phải có ít nhất 6 ký tự, gồm ít nhất 1 chữ hoa và 1 số."
+            has_error = True
+
         if matkhau != nhaplai:
             context['err_nhaplai'] = "Mật khẩu không khớp."
             has_error = True
@@ -205,9 +207,11 @@ def dangki(request):
         if not re.match(r'^[a-zA-Z0-9._%+-]+@gmail\.com$', gmail):
             context['err_gmail'] = "Vui lòng nhập đúng định dạng email @gmail.com!"
             has_error = True
+
         if TaiKhoan.objects.filter(SoDienThoai=sdt).exists():
             context['err_sdt'] = "Số điện thoại đã được sử dụng."
             has_error = True
+
         if not has_error:
             tai_khoan = TaiKhoan(
                 TenDangNhap=ten,
@@ -283,6 +287,10 @@ def dsuongthuoc(request):
 def taikhoan(request):
     trang_thai = request.GET.get('trang_thai')
 
+    # Gán mặc định là "Hoạt động" nếu không có gì được chọn
+    if not trang_thai:
+        trang_thai = 'Hoạt động'
+
     if trang_thai == 'Hoạt động':
         ds_taikhoan = TaiKhoan.objects.filter(TrangThai='hoatdong')
     elif trang_thai == 'Ngưng hoạt động':
@@ -306,25 +314,53 @@ def suadanhsach(request, id):
             'thongbao': 'Không có thông tin khám cho bệnh nhân này.'
         })
 
+    errors = {}
+    form_data = {
+        'thuoc': danhsach.Thuoc,
+        'ngayKham': danhsach.NgayKham.strftime('%Y-%m-%d') if danhsach.NgayKham else '',
+        'ngayTaiKham': danhsach.NgayTaiKham.strftime('%Y-%m-%d') if danhsach.NgayTaiKham else ''
+    }
+
     if request.method == 'POST':
         thuoc = request.POST.get('thuoc')
         ngay_kham = request.POST.get('ngayKham')
         ngay_tai_kham = request.POST.get('ngayTaiKham')
 
-        try:
-            danhsach.Thuoc = thuoc
-            danhsach.NgayKham = parse_date(ngay_kham) if ngay_kham else None
-            danhsach.NgayTaiKham = parse_date(ngay_tai_kham) if ngay_tai_kham else None
-            danhsach.save()
-            messages.success(request, 'Lưu thành công!')
-        except Exception as e:
-            messages.error(request, 'Lưu chưa được: ' + str(e))
+        form_data['thuoc'] = thuoc
+        form_data['ngayKham'] = ngay_kham
+        form_data['ngayTaiKham'] = ngay_tai_kham
 
-        return redirect('suadanhsach', id=id)
+        # Chuyển chuỗi thành object ngày
+        ngay_kham_date = parse_date(ngay_kham)
+        ngay_tai_kham_date = parse_date(ngay_tai_kham)
+        today = date.today()
+
+        if not ngay_kham_date:
+            errors['ngayKham'] = 'Vui lòng chọn ngày khám.'
+        elif ngay_kham_date < today:
+            errors['ngayKham'] = 'Ngày khám không được nhỏ hơn ngày hiện tại.'
+
+        if not ngay_tai_kham_date:
+            errors['ngayTaiKham'] = 'Vui lòng chọn ngày tái khám.'
+        elif ngay_tai_kham_date <= ngay_kham_date:
+            errors['ngayTaiKham'] = 'Ngày tái khám phải lớn hơn ngày khám.'
+
+        if not errors:
+            try:
+                danhsach.Thuoc = thuoc
+                danhsach.NgayKham = ngay_kham_date
+                danhsach.NgayTaiKham = ngay_tai_kham_date
+                danhsach.save()
+                messages.success(request, 'Lưu thành công!')
+                return redirect('suadanhsach', id=id)
+            except Exception as e:
+                messages.error(request, 'Lưu chưa được: ' + str(e))
 
     return render(request, 'dskhambenh/suadanhsach.html', {
         'benhnhan': benhnhan,
-        'danhsach': danhsach
+        'danhsach': danhsach,
+        'errors': errors,
+        'form_data': form_data
     })
 #trang sửa bệnh nhân
 def suabenhnhan(request, id):
@@ -458,14 +494,13 @@ def suataikhoan(request, id):
 
     return render(request, 'themdulieu/suataikhoan.html', context)
 
-#trang quên mật khẩu 
+#trang đổi mật khẩu 
 def doimatkhau(request):
     context = {}
 
-    # Lấy tên đăng nhập từ session
     ten_dang_nhap = request.session.get('ten_dang_nhap')
     if not ten_dang_nhap:
-        return redirect('/dangnhap/')  # Nếu chưa đăng nhập thì chuyển hướng
+        return redirect('/dangnhap/')
 
     try:
         user = TaiKhoan.objects.get(TenDangNhap=ten_dang_nhap)
@@ -477,13 +512,30 @@ def doimatkhau(request):
         matkhau_moi = request.POST.get("matkhau_moi")
         xacnhan_mk = request.POST.get("xacnhan_matkhau_moi")
 
+        has_error = False
+
+        # Kiểm tra mật khẩu hiện tại
         if not check_password(matkhau_ht, user.MatKhau):
             context['err_matkhau_hientai'] = "Mật khẩu hiện tại không đúng."
-        elif matkhau_moi != xacnhan_mk:
+            has_error = True
+
+        # Kiểm tra mật khẩu mới và xác nhận
+        if matkhau_moi != xacnhan_mk:
             context['err_xacnhan'] = "Mật khẩu xác nhận không khớp."
-        elif matkhau_ht == matkhau_moi:
+            has_error = True
+
+        # Kiểm tra trùng mật khẩu
+        if matkhau_ht == matkhau_moi:
             context['err_matkhau_moi'] = "Mật khẩu mới không được trùng với mật khẩu hiện tại."
-        else:
+            has_error = True
+
+        # Kiểm tra độ mạnh mật khẩu mới
+        if not re.match(r'^(?=.*[A-Z])(?=.*\d).{6,}$', matkhau_moi):
+            context['err_matkhau_moi'] = "Mật khẩu phải có ít nhất 6 ký tự, gồm ít nhất 1 chữ hoa và 1 số."
+            has_error = True
+
+        # Nếu không có lỗi mới tiến hành đổi mật khẩu
+        if not has_error:
             user.MatKhau = make_password(matkhau_moi)
             user.save()
             context['success'] = "Đổi mật khẩu thành công!"

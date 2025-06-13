@@ -28,7 +28,7 @@
             <div class="content">
                 <div class="row">
                     <div class="col-lg-8 offset-lg-2">
-                        <h4 class="page-title">Thêm bệnh nhân</h4>
+                        <h4 class="page-title">Cập nhập lịch uống thuốc</h4>
                     </div>
                 </div>
                 <div class="row">
@@ -76,12 +76,7 @@
 <div class="col-sm-6">
     <div class="form-group">
         <label>Khu</label>
-        <select class="form-control" name="khu" disabled>
-            <option value="">-- Chọn khu --</option>
-            <option value="Khu 1" {% if benhnhan.Khu == 'Khu 1' %}selected{% endif %}>Khu 1</option>
-            <option value="Khu 2" {% if benhnhan.Khu == 'Khu 2' %}selected{% endif %}>Khu 2</option>
-            <option value="Khu 3" {% if benhnhan.Khu == 'Khu 3' %}selected{% endif %}>Khu 3</option>
-        </select>
+        <input type="text" class="form-control" value="{{ benhnhan.Khu }}" disabled>
     </div>
 </div>
 
@@ -93,18 +88,26 @@
 </div>
 
         <div class="col-sm-6">
-            <div class="form-group">
-                <label>Ngày khám</label>
-                <input type="date" class="form-control" name="ngayKham" value="{{ danhsach.NgayKham|date:'Y-m-d' }}">
-            </div>
-        </div>
+    <div class="form-group">
+        <label>Ngày khám</label>
+        <input type="date" class="form-control" name="ngayKham"
+               value="{{ form_data.ngayKham }}">
+        {% if errors.ngayKham %}
+            <small class="text-danger">{{ errors.ngayKham }}</small>
+        {% endif %}
+    </div>
+</div>
 
-        <div class="col-sm-6">
-            <div class="form-group">
-                <label>Ngày tái khám</label>
-                <input type="date" class="form-control" name="ngayTaiKham" value="{{ danhsach.NgayTaiKham|date:'Y-m-d' }}">
-            </div>
-        </div>
+<div class="col-sm-6">
+    <div class="form-group">
+        <label>Ngày tái khám</label>
+        <input type="date" class="form-control" name="ngayTaiKham"
+               value="{{ form_data.ngayTaiKham }}">
+        {% if errors.ngayTaiKham %}
+            <small class="text-danger">{{ errors.ngayTaiKham }}</small>
+        {% endif %}
+    </div>
+</div>
     </div>
 
     <div class="m-t-20 text-center">

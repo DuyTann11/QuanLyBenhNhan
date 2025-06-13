@@ -46,11 +46,13 @@
            {% if trang_thai == "Hoạt động" or not trang_thai %}checked{% endif %}
            onchange="this.form.submit()"> Hoạt động
   </label>
+  &nbsp;&nbsp;
   <label>
     <input type="radio" name="trang_thai" value="Đang sửa"
            {% if trang_thai == "Đang sửa" %}checked{% endif %}
            onchange="this.form.submit()"> Đang sửa
   </label>
+  &nbsp;&nbsp;
   <label>
     <input type="radio" name="trang_thai" value="Tất cả"
            {% if trang_thai == "Tất cả" %}checked{% endif %}
