@@ -108,7 +108,23 @@
         {% endif %}
     </div>
 </div>
+<div class="col-sm-6">
+    <div class="form-group gender-select">
+        <label class="gen-label">Trạng thái:</label>
+        <div class="form-check-inline">
+            <label class="form-check-label">
+                <input type="radio" name="trangThai" value="Hoạt động" class="form-check-input"
+                    {% if benhnhan.TrangThai == 'Hoạt động' %}checked{% endif %}>Hoạt động
+            </label>
+        </div>
+        <div class="form-check-inline">
+            <label class="form-check-label">
+                <input type="radio" name="trangThai" value="Ngưng hoạt động" class="form-check-input"
+                    {% if benhnhan.TrangThai == 'Ngưng hoạt động' %}checked{% endif %}>Ngưng hoạt động
+            </label>
+        </div>
     </div>
+</div>
 
     <div class="m-t-20 text-center">
         <button class="btn btn-primary submit-btn">Lưu bệnh nhân</button>

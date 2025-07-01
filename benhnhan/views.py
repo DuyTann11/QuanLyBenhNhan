@@ -1,6 +1,6 @@
-
 import random
 import re
+import openpyxl # type: ignore
 from django.utils import timezone
 from datetime import date, timedelta
 from django.contrib import messages
@@ -9,6 +9,11 @@ from django.utils.dateparse import parse_date
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import HttpResponse
+
+from openpyxl.styles import Font # type: ignore
 from benhnhan.models import BenhNhan, DanhSachKham, KhuNha, Nha, NhanVien, TaiKhoan
 from core import settings
 
@@ -48,16 +53,43 @@ def trangchu(request):
     })
 #trang bệnh nhân
 def benhnhan(request):
-    trang_thai = request.GET.get('trang_thai', 'Hoạt động')
-    
+    trang_thai = request.GET.get('trang_thai')
+    keyword = request.GET.get('search', '').strip().lower()
+
+    # Nếu không có trạng thái được chọn thì mặc định là "Hoạt động"
+    if not trang_thai:
+        trang_thai = "Hoạt động"
+
+    ds_benhnhan = BenhNhan.objects.all()
+
+    # Lọc theo trạng thái
     if trang_thai in ['Hoạt động', 'Ngưng hoạt động']:
-        ds_benhnhan = BenhNhan.objects.filter(TrangThai=trang_thai)
-    else:
-        ds_benhnhan = BenhNhan.objects.all()
-        
+        ds_benhnhan = ds_benhnhan.filter(TrangThai=trang_thai)
+
+    # Lọc theo từ khóa
+    if keyword:
+        gioitinh_filter = ''
+        if keyword == 'nam':
+            gioitinh_filter = 'M'
+        elif keyword in ['nữ', 'nu']:
+            gioitinh_filter = 'F'
+
+        ds_benhnhan = ds_benhnhan.filter(
+            Q(HoVaTen__icontains=keyword) |
+            Q(NamSinh__icontains=keyword) |
+            Q(Khu__TenNha__icontains=keyword) |
+            Q(Khu__Khu__TenKhu__icontains=keyword) |
+            (Q(GioiTinh__iexact=gioitinh_filter) if gioitinh_filter else Q())
+        )
+
+    paginator = Paginator(ds_benhnhan, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'benhnhan/benhnhan.html', {
-        'ds_benhnhan': ds_benhnhan,
+        'page_obj': page_obj,
         'trang_thai': trang_thai,
+        'search': keyword,
     })
 #trang lịch uống thuốc 
 def lichuongthuoc(request):
@@ -65,28 +97,85 @@ def lichuongthuoc(request):
     tomorrow = today + timedelta(days=1)
 
     filter_option = request.GET.get('filter', '')
+    keyword = request.GET.get('search', '').strip().lower()
+    export = request.GET.get('export') == '1'
 
+    danhsach = DanhSachKham.objects.select_related('BenhNhan').filter(BenhNhan__TrangThai='Hoạt động')
+
+    # Lọc theo ngày
     if filter_option == 'homnay':
-        danhsach = DanhSachKham.objects.select_related('BenhNhan') \
-            .filter(
-                BenhNhan__TrangThai='Hoạt động',
-                NgayTaiKham=today
-            )
+        danhsach = danhsach.filter(NgayTaiKham=today)
     elif filter_option == 'ngaymai':
-        danhsach = DanhSachKham.objects.select_related('BenhNhan') \
-            .filter(
-                BenhNhan__TrangThai='Hoạt động',
-                NgayTaiKham=tomorrow
-            )
+        danhsach = danhsach.filter(NgayTaiKham=tomorrow)
     else:
-        danhsach = DanhSachKham.objects.select_related('BenhNhan') \
-            .filter(BenhNhan__TrangThai='Hoạt động') \
-            .exclude(NgayTaiKham=tomorrow)  # lọc tất cả trừ ngày mai
+        danhsach = danhsach.exclude(NgayTaiKham=tomorrow)
+
+    # Lọc theo từ khóa
+    if keyword:
+        gioitinh_filter = ''
+        if keyword == 'nam':
+            gioitinh_filter = 'M'
+        elif keyword in ['nữ', 'nu']:
+            gioitinh_filter = 'F'
+
+        filters = (
+            Q(BenhNhan__HoVaTen__icontains=keyword) |
+            Q(BenhNhan__Khu__TenNha__icontains=keyword) |
+            Q(BenhNhan__Khu__Khu__TenKhu__icontains=keyword)
+        )
+
+        if keyword.isdigit():
+            filters |= Q(BenhNhan__NamSinh=keyword)
+
+        if gioitinh_filter:
+            filters |= Q(BenhNhan__GioiTinh__iexact=gioitinh_filter)
+
+        danhsach = danhsach.filter(filters)
+
+    # Nếu xuất Excel
+    if export:
+        danhsach = list(danhsach)
+
+        # Tạo file Excel
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Danh sách"
+
+        headers = ['STT', 'Họ và tên', 'Năm sinh', 'Giới tính', 'Khu', 'Ngày khám', 'Ngày tái khám']
+        ws.append(headers)
+        for cell in ws[1]:
+            cell.font = Font(bold=True)
+
+        for i, item in enumerate(danhsach, 1):
+            bn = item.BenhNhan
+            ws.append([
+                i,
+                bn.HoVaTen,
+                bn.NamSinh,
+                'Nam' if bn.GioiTinh == 'M' else 'Nữ',
+                str(bn.Khu),
+                item.NgayKham.strftime('%d/%m/%Y') if item.NgayKham else '',
+                item.NgayTaiKham.strftime('%d/%m/%Y') if item.NgayTaiKham else ''
+            ])
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        filename = f"Danh sách uống thuốc ngày{today.strftime('%d-%m-%Y')}.xlsx"
+        response['Content-Disposition'] = f'attachment; filename=\"{filename}\"'
+        wb.save(response)
+        return response
+
+    # Nếu không xuất thì phân trang
+    paginator = Paginator(danhsach, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'benhnhan/lichuongthuoc.html', {
-        'danhsach': danhsach,
+        'page_obj': page_obj,
         'locTheoNgayMai': filter_option == 'ngaymai',
-        'locTheoHomNay': filter_option == 'homnay'
+        'locTheoHomNay': filter_option == 'homnay',
+        'filter': filter_option,
+        'search': keyword,
+        'export': export,
     })
 #trang bác sĩ
 def bacsi(request):
@@ -286,8 +375,8 @@ def dsuongthuoc(request):
 #trang tài khoản
 def taikhoan(request):
     trang_thai = request.GET.get('trang_thai')
+    keyword = request.GET.get('search', '').strip().lower()
 
-    # Gán mặc định là "Hoạt động" nếu không có gì được chọn
     if not trang_thai:
         trang_thai = 'Hoạt động'
 
@@ -298,9 +387,30 @@ def taikhoan(request):
     else:
         ds_taikhoan = TaiKhoan.objects.all()
 
+    # Tìm kiếm theo keyword
+    quyen_filter = ''
+    if keyword in ['quản trị', 'quản trị viên', 'admin']:
+        quyen_filter = 'admin'
+    elif keyword in ['nhân viên', 'nhan vien', 'nhanvien']:
+        quyen_filter = 'nhanvien'
+
+    if keyword:
+        ds_taikhoan = ds_taikhoan.filter(
+            Q(TenDangNhap__icontains=keyword) |
+            Q(Gmail__icontains=keyword) |
+            Q(SoDienThoai__icontains=keyword) |
+            Q(Quyen__iexact=quyen_filter) if quyen_filter else Q()
+        )
+
+    # ✅ Phân trang
+    paginator = Paginator(ds_taikhoan, 10)  # 10 tài khoản mỗi trang
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'benhnhan/taikhoan.html', {
-        'ds_taikhoan': ds_taikhoan,
-        'trang_thai': trang_thai
+        'page_obj': page_obj,
+        'trang_thai': trang_thai,
+        'search': keyword
     })
 #trang sửa danh sách khám bệnh
 def suadanhsach(request, id):
@@ -318,19 +428,23 @@ def suadanhsach(request, id):
     form_data = {
         'thuoc': danhsach.Thuoc,
         'ngayKham': danhsach.NgayKham.strftime('%Y-%m-%d') if danhsach.NgayKham else '',
-        'ngayTaiKham': danhsach.NgayTaiKham.strftime('%Y-%m-%d') if danhsach.NgayTaiKham else ''
+        'ngayTaiKham': danhsach.NgayTaiKham.strftime('%Y-%m-%d') if danhsach.NgayTaiKham else '',
+        'trangThai': benhnhan.TrangThai or ''
     }
 
     if request.method == 'POST':
         thuoc = request.POST.get('thuoc')
         ngay_kham = request.POST.get('ngayKham')
         ngay_tai_kham = request.POST.get('ngayTaiKham')
+        trang_thai = request.POST.get('trangThai')
 
-        form_data['thuoc'] = thuoc
-        form_data['ngayKham'] = ngay_kham
-        form_data['ngayTaiKham'] = ngay_tai_kham
+        form_data.update({
+            'thuoc': thuoc,
+            'ngayKham': ngay_kham,
+            'ngayTaiKham': ngay_tai_kham,
+            'trangThai': trang_thai
+        })
 
-        # Chuyển chuỗi thành object ngày
         ngay_kham_date = parse_date(ngay_kham)
         ngay_tai_kham_date = parse_date(ngay_tai_kham)
         today = date.today()
@@ -351,6 +465,10 @@ def suadanhsach(request, id):
                 danhsach.NgayKham = ngay_kham_date
                 danhsach.NgayTaiKham = ngay_tai_kham_date
                 danhsach.save()
+
+                benhnhan.TrangThai = trang_thai
+                benhnhan.save()
+
                 messages.success(request, 'Lưu thành công!')
                 return redirect('suadanhsach', id=id)
             except Exception as e:
@@ -544,17 +662,32 @@ def doimatkhau(request):
 
 #trang khu nhà ở 
 def khu(request):
-    trang_thai = request.GET.get('trang_thai', 'Hoạt động')  # Mặc định là 'Hoạt động'
-    
-    # Lọc danh sách nhà theo trạng thái
-    if trang_thai == 'Tất cả':
-        ds_nha = Nha.objects.select_related('Khu').all()
-    else:
-        ds_nha = Nha.objects.select_related('Khu').filter(TrangThai=trang_thai)
-    
+    trang_thai = request.GET.get('trang_thai', 'Hoạt động')
+    keyword = request.GET.get('search', '').strip().lower()
+
+    # Lấy danh sách nhà + khu liên kết
+    ds_nha = Nha.objects.select_related('Khu')
+
+    # Lọc theo trạng thái
+    if trang_thai != 'Tất cả':
+        ds_nha = ds_nha.filter(TrangThai=trang_thai)
+
+    # Lọc theo keyword
+    if keyword:
+        ds_nha = ds_nha.filter(
+            Q(TenNha__icontains=keyword) |
+            Q(Khu__TenKhu__icontains=keyword)
+        )
+
+    # ✅ Phân trang: 10 nhà mỗi trang
+    paginator = Paginator(ds_nha, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'benhnhan/khu.html', {
-        'ds_nha': ds_nha,
-        'trang_thai': trang_thai
+        'page_obj': page_obj,
+        'trang_thai': trang_thai,
+        'search': keyword
     })
 
 #trang thêm nhà ở
@@ -667,7 +800,7 @@ def suanha(request, nha_id):
                         messages.success(request, f'Cập nhật nhà "{ten_nha}" thành công!')
                         return redirect('themnha')
                 except Exception as e:
-                    messages.error(request, f'Lỗi khi cập nhật nhà: {str(e)}')
+                    messages.error(request, f'')
             else:
                 if not ten_nha:
                     err_ten_nha = 'Vui lòng nhập tên nhà.'

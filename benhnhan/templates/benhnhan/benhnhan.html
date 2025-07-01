@@ -1,8 +1,7 @@
- {% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <!-- patients23:17 -->
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0" />
@@ -12,13 +11,8 @@
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/font-awesome.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/select2.min.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/dataTables.bootstrap4.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap-datetimepicker.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}" />
-    <!--  [if lt IE 9]>
-		<script src="assets/js/html5shiv.min.js"></script>
-		<script src="assets/js/respond.min.js"></script>
-	<![endif]  -->
   </head>
 
   <body>
@@ -34,130 +28,139 @@
               <a href="/thembenhnhan/" class="btn btn btn-primary btn-rounded float-right"><i class="fa fa-plus"></i> Thêm bệnh nhân</a>
             </div>
           </div>
-          <input
-  type="text"
-  id="searchAll"
-  placeholder="🔍 Tìm theo tên, giới tính, hoặc khu..."
-  class="search-input"
-/>
+
           <form method="get" id="filter-form" class="mb-3">
-  <label>
-    <input type="radio" name="trang_thai" value="Hoạt động"
-           {% if trang_thai == "Hoạt động" %}checked{% endif %}
-           onchange="this.form.submit()"> Hoạt động
-  </label>
-  &nbsp;&nbsp;
-  <label>
-    <input type="radio" name="trang_thai" value="Ngưng hoạt động"
-           {% if trang_thai == "Ngưng hoạt động" %}checked{% endif %}
-           onchange="this.form.submit()"> Ngưng hoạt động
-  </label>
-  &nbsp;&nbsp;
-  <label>
-    <input type="radio" name="trang_thai" value=""
-           {% if not trang_thai %}checked{% endif %}
-           onchange="this.form.submit()"> Tất cả
-  </label>
+  <!-- Ô tìm kiếm -->
+  <div class="mb-2">
+    <input type="text" id="searchInput" name="search" value="{{ search }}" placeholder="🔍 Tìm theo tên, giới tính, hoặc khu..." class="search-input form-control" style="max-width: 300px;" />
+  </div>
+
+  <!-- Các nút radio trạng thái -->
+  <div class="d-flex gap-3 flex-wrap">
+    <label class="form-check-label">
+      <input type="radio" name="trang_thai" value="Hoạt động"
+             {% if trang_thai == "Hoạt động" %}checked{% endif %}
+             onchange="this.form.submit()"> Hoạt động
+    </label>
+&nbsp;&nbsp;
+    <label class="form-check-label">
+      <input type="radio" name="trang_thai" value="Ngưng hoạt động"
+             {% if trang_thai == "Ngưng hoạt động" %}checked{% endif %}
+             onchange="this.form.submit()"> Ngưng hoạt động
+    </label>
+&nbsp;&nbsp;
+    <label class="form-check-label">
+      <input type="radio" name="trang_thai" value=""
+             {% if not trang_thai %}checked{% endif %}
+             onchange="this.form.submit()"> Tất cả
+    </label>
+  </div>
 </form>
+
           <div class="row">
             <div class="col-md-12">
               <div class="table-responsive">
-                <table class="table table-border table-striped custom-table datatable mb-0">
-                  
-  <thead>
-    <tr>
-      <th>Họ và tên</th>
-      <th>Năm sinh</th>
-      <th>Giới tính</th>
-      <th>Khu</th>
-      
-      <th class="text-right">Hành động</th>
-      
-    </tr>
-  </thead>
-  <tbody>
-    {% for item in ds_benhnhan %}
-  <tr>
-    <td>
-      <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" />
-      {{ item.HoVaTen }}
-    </td>
-    <td>{{ item.NamSinh }}</td>
-    <td>{% if item.GioiTinh == 'M' %}Nam{% else %}Nữ{% endif %}</td>
-    <td>{{ item.Khu }}</td>
-    <td class="text-right">
-      <div class="dropdown dropdown-action">
-        {% if request.session.quyen != 'nhanvien' %}
-        <a href="#" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-          <i class="fa fa-ellipsis-v"></i>
-        </a>
-        <div class="dropdown-menu dropdown-menu-right">
-          <a class="dropdown-item" href="{% url 'suabenhnhan' item.BenhNhanID %}"><i class="fa fa-pencil m-r-5"></i>Chỉnh sửa</a>
-        </div>
-        {% endif %}
-      </div>
-    </td>
-  </tr>
-  {% empty %}
-  <tr>
-    <td colspan="5" class="text-center">Không có bệnh nhân nào</td>
-  </tr>
-  {% endfor %}
-    
-  </tbody>
-</table>
-
+                <table class="table table-border table-striped custom-table mb-0">
+                  <thead>
+                    <tr>
+                      <th>Họ và tên</th>
+                      <th>Năm sinh</th>
+                      <th>Giới tính</th>
+                      <th>Khu</th>
+                      <th class="text-right">Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in page_obj %}
+                    <tr>
+                      <td>
+                        <img width="28" height="28" src="{% static 'assets/img/user.jpg' %}" class="rounded-circle m-r-5" alt="" />
+                        {{ item.HoVaTen }}
+                      </td>
+                      <td>{{ item.NamSinh }}</td>
+                      <td>{% if item.GioiTinh == 'M' %}Nam{% else %}Nữ{% endif %}</td>
+                      <td>{{ item.Khu }}</td>
+                      <td class="text-right">
+                        <div class="dropdown dropdown-action">
+                          {% if request.session.quyen != 'nhanvien' %}
+                          <a href="#" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-ellipsis-v"></i>
+                          </a>
+                          <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="{% url 'suabenhnhan' item.BenhNhanID %}"><i class="fa fa-pencil m-r-5"></i>Chỉnh sửa</a>
+                          </div>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="5" class="text-center">Không có bệnh nhân nào</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
               </div>
+
+              <!-- PHÂN TRANG -->
+              <div class="mt-3">
+                <nav aria-label="Page navigation">
+                  <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page=1{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}">Trang đầu</a>
+                    </li>
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}">&laquo;</a>
+
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item disabled">
+                      <span class="page-link">Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}">&raquo;</a>
+                    </li>
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}">Trang cuối</a>
+                    </li>
+                    {% endif %}
+                  </ul>
+                </nav>
+              </div>
+
             </div>
           </div>
         </div>
-        
-      
+      </div>
+      {% endblock %}
     </div>
+
     <div class="sidebar-overlay" data-reff=""></div>
     <script src="{% static 'assets/js/jquery-3.2.1.min.js' %}"></script>
     <script src="{% static 'assets/js/popper.min.js' %}"></script>
     <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'assets/js/jquery.slimscroll.js' %}"></script>
     <script src="{% static 'assets/js/select2.min.js' %}"></script>
-    <script src="{% static 'assets/js/jquery.dataTables.min.js' %}"></script>
-    <script src="{% static 'assets/js/dataTables.bootstrap4.min.js' %}"></script>
     <script src="{% static 'assets/js/moment.min.js' %}"></script>
     <script src="{% static 'assets/js/bootstrap-datetimepicker.min.js' %}"></script>
     <script src="{% static 'assets/js/app.js' %}"></script>
-    <script>
-  $(document).ready(function () {
-    
-    // Kích hoạt dropdown nếu chưa hoạt động
-    $('.dropdown-toggle').dropdown();
-    $('div.dataTables_length select').css('width', '50px');
-    
-    
-  });
-  
-</script>
 <script>
-  const searchAll = document.getElementById('searchAll');
-  const tableBody = document.querySelector('.custom-table tbody');
+  const searchInput = document.getElementById('searchInput');
+  const form = document.getElementById('filter-form');
+  let typingTimer;
+  const doneTypingInterval = 600; // 0.6s sau khi ngừng gõ sẽ submit
 
-  searchAll.addEventListener('input', function () {
-    const keyword = this.value.toLowerCase();
-
-    for (let row of tableBody.rows) {
-      const name = row.cells[0].innerText.toLowerCase();  // Họ và tên (có hình)
-      const gender = row.cells[2].innerText.toLowerCase(); // Giới tính
-      const khu = row.cells[3].innerText.toLowerCase();    // Khu
-
-      if (name.includes(keyword) || gender.includes(keyword) || khu.includes(keyword)) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
-      }
-    }
+  searchInput.addEventListener('input', function () {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => {
+      form.submit();
+    }, doneTypingInterval);
   });
 </script>
-     {% endblock %}
+    
   </body>
-
-  <!-- patients23:19 -->
 </html>

@@ -33,16 +33,16 @@
                     </div>
                    
                 </div>
-                 <input
-  type="text"
-  id="searchAll"
-  placeholder="🔍 Tìm theo tên, giới tính, hoặc khu"
-  class="search-input"
-/>
+                 <form method="get" class="mb-3">
+  <div class="mb-2">
+    <input type="text" id="searchInput" name="search" value="{{ search }}" placeholder="🔍 Tìm theo tên, giới tính, hoặc khu..." class="search-input form-control" style="max-width: 300px;" />
+  </div>
+  <input type="hidden" name="filter" value="{{ filter }}">
+</form>
 				<div class="row">
 					<div class="col-md-12">
 						<div class="table-responsive">
-							<table class="table table-striped custom-table datatable">
+							<table class="table table-striped custom-table" id="my-table">
     <thead>
         <tr>
             <th>STT</th>
@@ -57,7 +57,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for item in danhsach %}
+        {% for item in page_obj %}
     <tr>
         <td>{{ forloop.counter }}</td>
         <td>
@@ -92,13 +92,46 @@
         
     </tbody>
 </table>
+<div class="mt-3">
+                <nav aria-label="Page navigation">
+                  <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page=1{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}">Trang đầu</a>
+                    </li>
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}">&laquo;</a>
+
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item disabled">
+                      <span class="page-link">Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}">&raquo;</a>
+                    </li>
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}">Trang cuối</a>
+                    </li>
+                    {% endif %}
+                  </ul>
+                </nav>
+              </div>
 <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
     <div>
         <div id="checkboxKhuContainer" style="margin: 20px 0;"></div>
     </div>
-    <button onclick="exportToExcel()" style="padding: 10px 20px; font-weight: bold; background-color: #4CAF50; color: white; border: none; cursor: pointer;white-space: nowrap; ">
+    <form method="get" style="display: inline;">
+    <input type="hidden" name="export" value="1">
+    <input type="hidden" name="filter" value="{{ filter }}">
+    <input type="hidden" name="search" value="{{ search }}">
+    <button type="submit" style="padding: 10px 20px; font-weight: bold; background-color: #4CAF50; color: white; border: none; cursor: pointer;">
         Xuất Excel
     </button>
+</form>
 </div>
 
 						</div>
@@ -254,31 +287,22 @@ function exportToExcel() {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSach");
 
-  XLSX.writeFile(workbook, "Danh sách uống thuốc.xlsx");
+  const tenFile = "Danh sách uống thuốc - " + new Date().toLocaleDateString('vi-VN') + ".xlsx";
+  XLSX.writeFile(workbook, tenFile);
 }
 </script>
 <script>
-  const searchAll = document.getElementById('searchAll');
-  const tableBody = document.querySelector('.table-striped.custom-table.datatable tbody');
+  const searchInput = document.getElementById('searchInput');
+  const form = document.getElementById('filter-form');
+  let typingTimer;
+  const doneTypingInterval = 600; // 0.6s sau khi ngừng gõ sẽ submit
 
-  function filterTable() {
-    const filter = searchAll.value.toLowerCase();
-
-    for (let row of tableBody.rows) {
-      const name = row.cells[1].textContent.toLowerCase();
-      const gender = row.cells[3].textContent.toLowerCase();
-      const khu = row.cells[4].textContent.toLowerCase();
-
-      // Nếu nhập chuỗi mà trùng tên hoặc giới tính hoặc khu thì hiển thị
-      if (name.includes(filter) || gender.includes(filter) || khu.includes(filter)) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
-      }
-    }
-  }
-
-  searchAll.addEventListener('input', filterTable);
+  searchInput.addEventListener('input', function () {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => {
+      form.submit();
+    }, doneTypingInterval);
+  });
 </script>
 <script>
   $(document).ready(function () {
@@ -290,6 +314,23 @@ function exportToExcel() {
     
   });
   
+</script>
+<script>
+window.addEventListener("DOMContentLoaded", function () {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('export') === '1') {
+    setTimeout(() => {
+      exportToExcel();  // Gọi hàm export đã có sẵn của bạn
+
+      // Sau khi xuất xong thì quay lại trang gốc (không export nữa)
+      urlParams.delete('export');
+      const newUrl = window.location.pathname + '?' + urlParams.toString();
+      setTimeout(() => {
+        window.location.href = newUrl;
+      }, 800); // Delay chút để cho người dùng thấy đã tải xong file
+    }, 300);
+  }
+});
 </script>
      {% endblock %}
 </body>

@@ -34,35 +34,37 @@
               <a href="/themnha/" class="btn btn btn-primary btn-rounded float-right"><i class="fa fa-plus"></i> Thêm nhà ở</a>
             </div>
           </div>
-           <input
-  type="text"
-  id="searchAll"
-  placeholder="🔍 Tìm theo tất cả"
-  class="search-input"
-/>
-          <form method="get" id="filter-form" class="mb-3">
-<label>
-    <input type="radio" name="trang_thai" value="Hoạt động"
-           {% if trang_thai == "Hoạt động" or not trang_thai %}checked{% endif %}
-           onchange="this.form.submit()"> Hoạt động
-  </label>
-  &nbsp;&nbsp;
-  <label>
-    <input type="radio" name="trang_thai" value="Đang sửa"
-           {% if trang_thai == "Đang sửa" %}checked{% endif %}
-           onchange="this.form.submit()"> Đang sửa
-  </label>
-  &nbsp;&nbsp;
-  <label>
-    <input type="radio" name="trang_thai" value="Tất cả"
-           {% if trang_thai == "Tất cả" %}checked{% endif %}
-           onchange="this.form.submit()"> Tất cả
-  </label>
+           <form method="get" id="filter-form" class="mb-3">
+  <!-- Ô tìm kiếm -->
+  <div class="mb-2">
+    <input type="text" id="searchInput" name="search" value="{{ search }}" placeholder="🔍 Tìm theo tên, giới tính, hoặc khu..." class="search-input form-control" style="max-width: 300px;" />
+  </div>
+
+  <!-- Các nút radio trạng thái -->
+  <div class="d-flex gap-3 flex-wrap">
+    <label>
+      <input type="radio" name="trang_thai" value="Hoạt động"
+             {% if trang_thai == "Hoạt động" %}checked{% endif %}
+             onchange="this.form.submit()"> Hoạt động
+    </label>
+    &nbsp;&nbsp;
+    <label>
+      <input type="radio" name="trang_thai" value="Đang sửa"
+             {% if trang_thai == "Đang sửa" %}checked{% endif %}
+             onchange="this.form.submit()"> Đang sửa
+    </label>
+    &nbsp;&nbsp;
+    <label>
+      <input type="radio" name="trang_thai" value="Tất cả"
+             {% if trang_thai == "Tất cả" %}checked{% endif %}
+             onchange="this.form.submit()"> Tất cả
+    </label>
+  </div>
 </form>
           <div class="row">
             <div class="col-md-12">
               <div class="table-responsive">
-                <table class="table table-border table-striped custom-table datatable mb-0">
+                <table class="table table-border table-striped custom-table mb-0">
   <thead>
     <tr>
       <th>Tên nhà</th>
@@ -72,7 +74,7 @@
     </tr>
   </thead>
   <tbody>
-    {% for nha in ds_nha %}
+    {% for nha in page_obj %}
     <tr>
       <td>{{ nha.TenNha }}</td>
       <td>{{ nha.Khu.TenKhu }}</td>
@@ -100,6 +102,33 @@
 
 
               </div>
+              <div class="mt-3">
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page=1{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}{% if search %}&search={{ search }}{% endif %}">Trang đầu</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}{% if search %}&search={{ search }}{% endif %}">&laquo;</a>
+      </li>
+      {% endif %}
+
+      <li class="page-item disabled">
+        <span class="page-link">Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      </li>
+
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}{% if search %}&search={{ search }}{% endif %}">&raquo;</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}{% if search %}&search={{ search }}{% endif %}">Trang cuối</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
             </div>
           </div>
         </div>
@@ -146,6 +175,19 @@
         row.style.display = 'none';
       }
     }
+  });
+</script>
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const form = document.getElementById('filter-form');
+  let typingTimer;
+  const doneTypingInterval = 3000; // 0.6s sau khi ngừng gõ sẽ submit
+
+  searchInput.addEventListener('input', function () {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => {
+      form.submit();
+    }, doneTypingInterval);
   });
 </script>
      {% endblock %}
