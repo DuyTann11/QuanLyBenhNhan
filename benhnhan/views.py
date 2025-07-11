@@ -11,6 +11,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 from django.core.paginator import Paginator
 from django.db.models import Q
+from urllib.parse import quote
 from django.http import HttpResponse
 
 from openpyxl.styles import Font # type: ignore
@@ -28,7 +29,8 @@ def trangchu(request):
     
     ngayHomNay = timezone.now().date()
     ngayMai = ngayHomNay + timedelta(days=1)
-
+    soNguoiCanTaiKhamHomNay = DanhSachKham.objects.filter(NgayTaiKham=ngayHomNay) \
+    .values('BenhNhan').distinct().count()
     # 🔁 Cập nhật logic so sánh với ngày mai
     soNguoiCanTaiKham = DanhSachKham.objects.filter(NgayTaiKham=ngayMai) \
         .values('BenhNhan').distinct().count()
@@ -49,7 +51,9 @@ def trangchu(request):
         'danhsach': danhsach,
         'soNguoiCanUongThuoc': soNguoiCanUongThuoc,
         'nhanviens': nhanviens,
-        'soTaiKhoan': soTaiKhoan
+        'soTaiKhoan': soTaiKhoan,
+        'soNguoiCanTaiKhamHomNay': soNguoiCanTaiKhamHomNay,
+        'ngayHomNay': ngayHomNay
     })
 #trang bệnh nhân
 def benhnhan(request):
@@ -96,21 +100,22 @@ def lichuongthuoc(request):
     today = timezone.now().date()
     tomorrow = today + timedelta(days=1)
 
-    filter_option = request.GET.get('filter', '')
+    filter_option = request.GET.get('filter', '').lower()
     keyword = request.GET.get('search', '').strip().lower()
     export = request.GET.get('export') == '1'
+    khu_checked = request.GET.getlist('khuCheckbox')
 
-    danhsach = DanhSachKham.objects.select_related('BenhNhan').filter(BenhNhan__TrangThai='Hoạt động')
+    # Dữ liệu chính
+    danhsach = DanhSachKham.objects.select_related('BenhNhan', 'BenhNhan__Khu', 'BenhNhan__Khu__Khu') \
+        .filter(BenhNhan__TrangThai='Hoạt động')
 
-    # Lọc theo ngày
-    if filter_option == 'homnay':
+    if filter_option == 'ngayhomnay':
         danhsach = danhsach.filter(NgayTaiKham=today)
     elif filter_option == 'ngaymai':
         danhsach = danhsach.filter(NgayTaiKham=tomorrow)
     else:
         danhsach = danhsach.exclude(NgayTaiKham=tomorrow)
 
-    # Lọc theo từ khóa
     if keyword:
         gioitinh_filter = ''
         if keyword == 'nam':
@@ -132,11 +137,17 @@ def lichuongthuoc(request):
 
         danhsach = danhsach.filter(filters)
 
-    # Nếu xuất Excel
+    # ✅ Lọc theo khu đã chọn
+    if khu_checked:
+        danhsach = danhsach.filter(BenhNhan__Khu__TenNha__in=khu_checked)
+
+    # ✅ Tất cả nhà kèm khu
+    tatca_khu = Nha.objects.select_related('Khu').filter(TrangThai='Hoạt động')
+
+    # 📥 Xuất Excel
     if export:
         danhsach = list(danhsach)
 
-        # Tạo file Excel
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Danh sách"
@@ -153,18 +164,17 @@ def lichuongthuoc(request):
                 bn.HoVaTen,
                 bn.NamSinh,
                 'Nam' if bn.GioiTinh == 'M' else 'Nữ',
-                str(bn.Khu),
+                f"{bn.Khu.TenNha} - {bn.Khu.Khu.TenKhu}",
                 item.NgayKham.strftime('%d/%m/%Y') if item.NgayKham else '',
                 item.NgayTaiKham.strftime('%d/%m/%Y') if item.NgayTaiKham else ''
             ])
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        filename = f"Danh sách uống thuốc ngày{today.strftime('%d-%m-%Y')}.xlsx"
-        response['Content-Disposition'] = f'attachment; filename=\"{filename}\"'
+        filename = f"Danh sách uống thuốc ngày {today.strftime('%d-%m-%Y')}.xlsx"
+        response['Content-Disposition'] = f'attachment; filename="{quote(filename)}"'
         wb.save(response)
         return response
 
-    # Nếu không xuất thì phân trang
     paginator = Paginator(danhsach, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -172,10 +182,12 @@ def lichuongthuoc(request):
     return render(request, 'benhnhan/lichuongthuoc.html', {
         'page_obj': page_obj,
         'locTheoNgayMai': filter_option == 'ngaymai',
-        'locTheoHomNay': filter_option == 'homnay',
+        'locTheoHomNay': filter_option == 'ngayhomnay',
         'filter': filter_option,
         'search': keyword,
         'export': export,
+        'tatca_khu': tatca_khu,
+        'khu_checked': khu_checked
     })
 #trang bác sĩ
 def bacsi(request):
@@ -450,14 +462,10 @@ def suadanhsach(request, id):
         today = date.today()
 
         if not ngay_kham_date:
-            errors['ngayKham'] = 'Vui lòng chọn ngày khám.'
-        elif ngay_kham_date < today:
-            errors['ngayKham'] = 'Ngày khám không được nhỏ hơn ngày hiện tại.'
+         errors['ngayKham'] = 'Vui lòng chọn ngày khám.'
 
         if not ngay_tai_kham_date:
-            errors['ngayTaiKham'] = 'Vui lòng chọn ngày tái khám.'
-        elif ngay_tai_kham_date <= ngay_kham_date:
-            errors['ngayTaiKham'] = 'Ngày tái khám phải lớn hơn ngày khám.'
+         errors['ngayTaiKham'] = 'Vui lòng chọn ngày tái khám.'
 
         if not errors:
             try:

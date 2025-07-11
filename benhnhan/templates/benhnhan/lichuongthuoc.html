@@ -121,17 +121,32 @@
                 </nav>
               </div>
 <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        <div id="checkboxKhuContainer" style="margin: 20px 0;"></div>
+    <div id="checkboxKhuContainer" style="margin: 20px 0;">
+        <strong>Chọn khu muốn xuất:</strong><br>
+        <input type="checkbox" id="checkAllKhu" onclick="toggleChonTatCaKhu(this)">
+        <label for="checkAllKhu" style="margin-right: 15px;">Chọn tất cả</label><br>
+
+        {% for nha in tatca_khu %}
+            {% with label=nha.TenNha|stringformat:"s"|add:" - "|add:nha.Khu.TenKhu %}
+                <input type="checkbox" name="khuCheckbox" value="{{ nha.TenNha }}"
+                    id="khu_{{ forloop.counter }}"
+                    {% if nha.TenNha in khu_checked %}checked{% endif %}>
+                <label for="khu_{{ forloop.counter }}" style="margin-right: 15px; margin-left: 5px;">
+                    {{ label }}
+                </label>
+            {% endwith %}
+        {% endfor %}
     </div>
-    <form method="get" style="display: inline;">
-    <input type="hidden" name="export" value="1">
-    <input type="hidden" name="filter" value="{{ filter }}">
-    <input type="hidden" name="search" value="{{ search }}">
-    <button type="submit" style="padding: 10px 20px; font-weight: bold; background-color: #4CAF50; color: white; border: none; cursor: pointer;">
-        Xuất Excel
-    </button>
-</form>
+
+    <form method="get" id="exportForm" style="display: inline;">
+        <input type="hidden" name="export" value="1">
+        <input type="hidden" name="filter" value="{{ filter }}">
+        <input type="hidden" name="search" value="{{ search }}">
+        <!-- Khu sẽ được thêm qua JS khi submit -->
+        <button type="submit" style="padding: 10px 20px; font-weight: bold; background-color: #4CAF50; color: white; border: none; cursor: pointer;">
+            Xuất Excel
+        </button>
+    </form>
 </div>
 
 						</div>
@@ -165,88 +180,26 @@
      </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-function taoCheckboxKhu() {
-  const khuSet = new Set();
-  const rows = document.querySelectorAll("table tbody tr");
+function toggleChonTatCaKhu(master) {
+    const checkboxes = document.querySelectorAll('input[name="khuCheckbox"]');
+    checkboxes.forEach(cb => cb.checked = master.checked);
+}
 
-  rows.forEach(row => {
-    const khu = row.cells[4]?.innerText.trim(); // Cột "Khu"
-    if (khu) khuSet.add(khu);
-  });
+document.getElementById('exportForm').addEventListener('submit', function (e) {
+    const form = this;
 
-  const container = document.getElementById("checkboxKhuContainer");
-  container.innerHTML = `
-    <strong>Chọn khu muốn xuất:</strong><br>
-    <input type="checkbox" id="checkAllKhu" onclick="toggleChonTatCaKhu(this)">
-    <label for="checkAllKhu" style="margin-right: 15px;">Chọn tất cả</label><br>
-  `;
+    // Xóa input ẩn cũ
+    form.querySelectorAll('input[name="khuCheckbox"]').forEach(el => el.remove());
 
-  khuSet.forEach(khu => {
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.name = "khuCheckbox";
-    checkbox.value = khu;
-    checkbox.id = `khu_${khu}`;
-
-    const label = document.createElement("label");
-    label.htmlFor = `khu_${khu}`;
-    label.style.marginRight = "15px";
-    label.style.marginLeft = "5px";
-    label.appendChild(document.createTextNode(khu));
-
-    container.appendChild(checkbox);
-    container.appendChild(label);
-  });
-
-  // Tự động bỏ chọn "Chọn tất cả" nếu một checkbox bị bỏ
-  document.querySelectorAll('input[name="khuCheckbox"]').forEach(cb => {
-    cb.addEventListener('change', () => {
-      const allCheckboxes = document.querySelectorAll('input[name="khuCheckbox"]');
-      const allChecked = Array.from(allCheckboxes).every(c => c.checked);
-      document.getElementById("checkAllKhu").checked = allChecked;
+    // Thêm các checkbox đã chọn
+    document.querySelectorAll('input[name="khuCheckbox"]:checked').forEach(cb => {
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'khuCheckbox';
+        hidden.value = cb.value;
+        form.appendChild(hidden);
     });
-  });
-}
-
-function toggleChonTatCaKhu(masterCheckbox) {
-  const checkboxes = document.querySelectorAll('input[name="khuCheckbox"]');
-  checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
-}
-
-window.onload = taoCheckboxKhu;
-</script>
-<script>
-function locTheoKhu() {
-  const checkedValues = Array.from(document.querySelectorAll('input[name="khuCheckbox"]:checked'))
-    .map(cb => cb.value);
-
-  const rows = document.querySelectorAll("table tbody tr");
-
-  rows.forEach(row => {
-    const khu = row.cells[4]?.innerText.trim();
-    if (checkedValues.length === 0 || checkedValues.includes(khu)) {
-      row.style.display = ""; // Hiện ra
-    } else {
-      row.style.display = "none"; // Ẩn đi
-    }
-  });
-}
-
-// Gọi locTheoKhu mỗi khi checkbox thay đổi
-function ganSuKienLocTheoKhu() {
-  const checkboxes = document.querySelectorAll('input[name="khuCheckbox"]');
-  checkboxes.forEach(cb => {
-    cb.addEventListener('change', locTheoKhu);
-  });
-}
-
-window.onload = function () {
-  taoCheckboxKhu();         // Tạo checkbox từ cột Khu
-  setTimeout(() => {
-    locTheoKhu();           // Áp dụng lọc ngay từ đầu nếu cần
-    ganSuKienLocTheoKhu();  // Gắn sự kiện lọc mỗi khi checkbox thay đổi
-  }, 100); // Chờ chút cho checkbox được render xong
-};
+});
 </script>
 <script>
 function exportToExcel() {
