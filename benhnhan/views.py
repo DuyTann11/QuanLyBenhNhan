@@ -42,7 +42,11 @@ def trangchu(request):
     soNguoiCanUongThuoc = danhsach.count()
 
     nhanviens = NhanVien.objects.all()
-
+    soNguoiQuaHanTaiKham = DanhSachKham.objects.filter(
+    NgayTaiKham__lt=ngayHomNay,
+    NgayTaiKham__isnull=False,
+    BenhNhan__TrangThai='Hoạt động'
+).values('BenhNhan').distinct().count()
     return render(request, 'benhnhan/trangchu.html', {
         'soNhanVienDangLam': soNhanVienDangLam,
         'soBenhNhan': soBenhNhan,
@@ -53,7 +57,8 @@ def trangchu(request):
         'nhanviens': nhanviens,
         'soTaiKhoan': soTaiKhoan,
         'soNguoiCanTaiKhamHomNay': soNguoiCanTaiKhamHomNay,
-        'ngayHomNay': ngayHomNay
+        'ngayHomNay': ngayHomNay,
+        'soNguoiQuaHanTaiKham': soNguoiQuaHanTaiKham,
     })
 #trang bệnh nhân
 def benhnhan(request):
@@ -61,8 +66,8 @@ def benhnhan(request):
     keyword = request.GET.get('search', '').strip().lower()
 
     # Nếu không có trạng thái được chọn thì mặc định là "Hoạt động"
-    if not trang_thai:
-        trang_thai = "Hoạt động"
+    if 'trang_thai' not in request.GET:
+      trang_thai = "Hoạt động"
 
     ds_benhnhan = BenhNhan.objects.all()
 
@@ -109,13 +114,27 @@ def lichuongthuoc(request):
     danhsach = DanhSachKham.objects.select_related('BenhNhan', 'BenhNhan__Khu', 'BenhNhan__Khu__Khu') \
         .filter(BenhNhan__TrangThai='Hoạt động')
 
+    # Lọc theo filter
     if filter_option == 'ngayhomnay':
         danhsach = danhsach.filter(NgayTaiKham=today)
     elif filter_option == 'ngaymai':
         danhsach = danhsach.filter(NgayTaiKham=tomorrow)
+    elif filter_option == 'quahan':
+        danhsach = danhsach.filter(NgayTaiKham__lt=today)
     else:
         danhsach = danhsach.exclude(NgayTaiKham=tomorrow)
 
+    # Tiêu đề trang (phải đặt TRƯỚC phần export)
+    if filter_option == 'ngayhomnay':
+        tieu_de = "Danh sách tái khám hôm nay"
+    elif filter_option == 'ngaymai':
+        tieu_de = "Danh sách tái khám ngày mai"
+    elif filter_option == 'quahan':
+        tieu_de = "Danh sách quá hạn tái khám"
+    else:
+        tieu_de = "Danh sách uống thuốc"
+
+    # Lọc theo keyword
     if keyword:
         gioitinh_filter = ''
         if keyword == 'nam':
@@ -137,14 +156,19 @@ def lichuongthuoc(request):
 
         danhsach = danhsach.filter(filters)
 
-    # ✅ Lọc theo khu đã chọn
+    # Lọc khu đã chọn
     if khu_checked:
         danhsach = danhsach.filter(BenhNhan__Khu__TenNha__in=khu_checked)
 
-    # ✅ Tất cả nhà kèm khu
+    # Tất cả khu đang hoạt động
     tatca_khu = Nha.objects.select_related('Khu').filter(TrangThai='Hoạt động')
 
-    # 📥 Xuất Excel
+    # Thống kê
+    soNguoiCanTaiKham = DanhSachKham.objects.filter(NgayTaiKham=tomorrow, BenhNhan__TrangThai='Hoạt động').count()
+    soNguoiCanTaiKhamHomNay = DanhSachKham.objects.filter(NgayTaiKham=today, BenhNhan__TrangThai='Hoạt động').count()
+    soNguoiQuaHanTaiKham = DanhSachKham.objects.filter(NgayTaiKham__lt=today, BenhNhan__TrangThai='Hoạt động').count()
+
+    # Xuất Excel
     if export:
         danhsach = list(danhsach)
 
@@ -152,7 +176,7 @@ def lichuongthuoc(request):
         ws = wb.active
         ws.title = "Danh sách"
 
-        headers = ['STT', 'Họ và tên', 'Năm sinh', 'Giới tính', 'Khu', 'Ngày khám', 'Ngày tái khám']
+        headers = ['STT', 'Họ và tên', 'Năm sinh', 'Giới tính', 'Khu', 'Thuốc', 'Ngày khám', 'Ngày tái khám']
         ws.append(headers)
         for cell in ws[1]:
             cell.font = Font(bold=True)
@@ -165,16 +189,18 @@ def lichuongthuoc(request):
                 bn.NamSinh,
                 'Nam' if bn.GioiTinh == 'M' else 'Nữ',
                 f"{bn.Khu.TenNha} - {bn.Khu.Khu.TenKhu}",
+                item.Thuoc if item.Thuoc else '',
                 item.NgayKham.strftime('%d/%m/%Y') if item.NgayKham else '',
                 item.NgayTaiKham.strftime('%d/%m/%Y') if item.NgayTaiKham else ''
             ])
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        filename = f"Danh sách uống thuốc ngày {today.strftime('%d-%m-%Y')}.xlsx"
+        filename = f"{tieu_de} - {today.strftime('%d-%m-%Y')}.xlsx"
         response['Content-Disposition'] = f'attachment; filename="{quote(filename)}"'
         wb.save(response)
         return response
 
+    # Phân trang
     paginator = Paginator(danhsach, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -187,7 +213,12 @@ def lichuongthuoc(request):
         'search': keyword,
         'export': export,
         'tatca_khu': tatca_khu,
-        'khu_checked': khu_checked
+        'khu_checked': khu_checked,
+        'tieu_de': tieu_de,
+        'soNguoiCanTaiKham': soNguoiCanTaiKham,
+        'soNguoiCanTaiKhamHomNay': soNguoiCanTaiKhamHomNay,
+        'soNguoiQuaHanTaiKham': soNguoiQuaHanTaiKham,
+        'ngayTaiKham': tomorrow
     })
 #trang bác sĩ
 def bacsi(request):

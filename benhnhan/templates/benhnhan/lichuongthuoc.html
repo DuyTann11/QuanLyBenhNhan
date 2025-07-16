@@ -9,7 +9,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
     <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
-    {% block title %}Lịch uống thuốc{% endblock %}
+    {% block title %}{{ tieu_de }}{% endblock %}
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/font-awesome.min.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/select2.min.css' %}" />
@@ -29,7 +29,7 @@
             <div class="content">
                 <div class="row">
                     <div class="col-sm-4 col-3">
-                        <h4 class="page-title">Danh sách uống thuốc</h4>
+                        <h4 class="page-title">{{ tieu_de }}</h4>
                     </div>
                    
                 </div>
@@ -93,33 +93,32 @@
     </tbody>
 </table>
 <div class="mt-3">
-                <nav aria-label="Page navigation">
-                  <ul class="pagination justify-content-center">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                      <a class="page-link" href="?page=1{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}">Trang đầu</a>
-                    </li>
-                    <li class="page-item">
-                      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}">&laquo;</a>
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1&filter={{ filter }}&search={{ search }}">Trang đầu</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&filter={{ filter }}&search={{ search }}">&laquo;</a>
+            </li>
+            {% endif %}
 
-                    </li>
-                    {% endif %}
+            <li class="page-item disabled">
+                <span class="page-link">Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            </li>
 
-                    <li class="page-item disabled">
-                      <span class="page-link">Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-                    </li>
-
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}">&raquo;</a>
-                    </li>
-                    <li class="page-item">
-                      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if trang_thai %}&trang_thai={{ trang_thai }}{% endif %}">Trang cuối</a>
-                    </li>
-                    {% endif %}
-                  </ul>
-                </nav>
-              </div>
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&filter={{ filter }}&search={{ search }}">&raquo;</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&filter={{ filter }}&search={{ search }}">Trang cuối</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
 <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
     <div id="checkboxKhuContainer" style="margin: 20px 0;">
         <strong>Chọn khu muốn xuất:</strong><br>
@@ -240,7 +239,8 @@ function exportToExcel() {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSach");
 
-  const tenFile = "Danh sách uống thuốc - " + new Date().toLocaleDateString('vi-VN') + ".xlsx";
+  const tieuDe = "{{ tieu_de|escapejs }}";
+  const tenFile = tieuDe + " - " + new Date().toLocaleDateString('vi-VN') + ".xlsx";
   XLSX.writeFile(workbook, tenFile);
 }
 </script>
