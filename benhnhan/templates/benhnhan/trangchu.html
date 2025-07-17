@@ -63,24 +63,25 @@
             </div>
           </div>
           <div class="row">
-{% if soNguoiCanTaiKham > 0 %}
-<div class="col-md-5"style="width: 100px; overflow: hidden;">
-    <a href="{% url 'lichuongthuoc' %}?filter=ngaymai" style="text-decoration: none;">
-        <div class="alert alert-info d-flex align-items-center" role="alert">
-            <i class="fa fa-info-circle mr-2" aria-hidden="true"></i>
-            <span>
-                <strong>
-                    Có {{ soNguoiCanTaiKham }} người cần được tái khám vào ngày {{ ngayTaiKham|date:"d/m/Y" }}.
-                </strong>
-            </span>
-        </div>
-    </a>
+    {% if soNguoiCanTaiKham > 0 %}
+    <div class="col-12 col-md-5" style="overflow: hidden;">
+        <a href="{% url 'lichuongthuoc' %}?filter=ngaymai" style="text-decoration: none;">
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+                <i class="fa fa-info-circle mr-2" aria-hidden="true"></i>
+                <span>
+                    <strong>
+                        Có {{ soNguoiCanTaiKham }} người cần được tái khám vào ngày {{ ngayTaiKham|date:"d/m/Y" }}.
+                    </strong>
+                </span>
+            </div>
+        </a>
+    </div>
+    {% endif %}
 </div>
-{% endif %}
-</div>
+
 <div class="row">
     {% if soNguoiCanTaiKhamHomNay > 0 %}
-    <div class="col-md-5"style="width: 100px; overflow: hidden;">
+    <div class="col-12 col-md-5" style="overflow: hidden;">
         <a href="{% url 'lichuongthuoc' %}?filter=ngayhomnay" style="text-decoration: none;">
             <div class="alert alert-warning d-flex align-items-center" role="alert">
                 <i class="fa fa-exclamation-circle mr-2" aria-hidden="true"></i>
@@ -94,9 +95,10 @@
     </div>
     {% endif %}
 </div>
+
 <div class="row">
     {% if soNguoiQuaHanTaiKham > 0 %}
-    <div class="col-md-5"style="width: 100px; overflow: hidden;">
+    <div class="col-12 col-md-5" style="overflow: hidden;">
         <a href="{% url 'lichuongthuoc' %}?filter=quahan" style="text-decoration: none;">
             <div class="alert alert-danger d-flex align-items-center" role="alert">
                 <i class="fa fa-times-circle mr-2" aria-hidden="true"></i>
