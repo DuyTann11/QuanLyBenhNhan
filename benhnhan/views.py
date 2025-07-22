@@ -36,10 +36,13 @@ def trangchu(request):
         .values('BenhNhan').distinct().count()
 
     danhsach = DanhSachKham.objects.select_related('BenhNhan') \
-        .filter(BenhNhan__TrangThai='Hoạt động') \
-        .exclude(NgayTaiKham=ngayMai)
+    .filter(
+        BenhNhan__TrangThai='Hoạt động',
+        NgayTaiKham__gte=ngayHomNay,   
+    ) \
+    .exclude(NgayTaiKham=ngayMai)     
 
-    soNguoiCanUongThuoc = danhsach.count()
+    soNguoiCanUongThuoc = danhsach.values('BenhNhan').distinct().count()
 
     nhanviens = NhanVien.objects.all()
     soNguoiQuaHanTaiKham = DanhSachKham.objects.filter(
@@ -122,7 +125,7 @@ def lichuongthuoc(request):
     elif filter_option == 'quahan':
         danhsach = danhsach.filter(NgayTaiKham__lt=today)
     else:
-        danhsach = danhsach.exclude(NgayTaiKham=tomorrow)
+        danhsach = danhsach.exclude(NgayTaiKham__lt=today).exclude(NgayTaiKham=tomorrow)
 
     # Tiêu đề trang (phải đặt TRƯỚC phần export)
     if filter_option == 'ngayhomnay':
